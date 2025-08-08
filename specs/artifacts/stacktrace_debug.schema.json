@@ -1,0 +1,76 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DebugStacktrace",
+  "type": "object",
+  "properties": {
+    "error_message": {
+      "type": "string",
+      "description": "The main error or exception message from the stacktrace. Only include information directly present in the stacktrace. Do not infer or hallucinate details."
+    },
+    "stack_frames": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "function": {
+            "type": "string",
+            "description": "Function or method where the error occurred. Only use the name as shown in the stacktrace. Do not guess or hallucinate."
+          },
+          "file": {
+            "type": "string",
+            "description": "File name where the function is defined. Only use the file name as shown in the stacktrace. Do not guess or hallucinate."
+          },
+          "line": {
+            "type": "integer",
+            "description": "Line number of the file. Only use the line number as shown in the stacktrace. Do not guess or hallucinate."
+          },
+          "code_snippet": {
+            "type": "string",
+            "description": "Relevant code from the problematic line. Only include code that is present in the stacktrace or source. Do not invent or hallucinate code."
+          }
+        },
+        "required": ["function", "file", "line"]
+      }
+    },
+    "possible_root_causes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "description": "A possible root cause inferred from the stacktrace. Only include causes that are reasonable and supported by the stacktrace. Do not hallucinate or invent causes."
+      },
+      "description": "List of potential root causes. Only include causes supported by the stacktrace. Do not hallucinate or invent causes."
+    },
+    "next_steps": {
+      "type": "array",
+      "items": {
+        "type": "string",
+      "description": "Suggested debugging or remediation actions. Only include steps that are reasonable and supported by the stacktrace. Do not hallucinate or invent steps."
+      },
+      "description": "Recommended steps to debug or resolve the issue."
+    },
+    "observations": {
+      "type": "array",
+      "items": {
+        "type": "string",
+      "description": "Notable observations, hypotheses, or patterns. Only include observations supported by the stacktrace. Do not hallucinate or invent information."
+      },
+      "description": "Optional notes or hypotheses from the debug process. Only include notes or hypotheses supported by the stacktrace. Do not hallucinate or invent information."
+    },
+    "confidence_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Confidence score (0 to 1) for the accuracy of the analysis. Only provide a score if it can be justified by the stacktrace and supporting evidence. Do not hallucinate or guess."
+    }
+    ,
+    "missing_information": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "description": "Information that is missing from the stacktrace or debug context and would help clarify the issue. Only include items that are genuinely missing and relevant. Do not hallucinate or invent information."
+      },
+      "description": "List of missing information that would help clarify the issue. Only include items that are genuinely missing and relevant. Do not hallucinate or invent information."
+    }
+  },
+  "required": ["error_message", "stack_frames", "possible_root_causes", "next_steps", "missing_information"]
+}

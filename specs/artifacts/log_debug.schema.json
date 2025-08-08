@@ -1,0 +1,103 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DebugLogs",
+  "type": "object",
+  "properties": {
+    "log_entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "timestamp": {
+            "type": "string",
+            "description": "Timestamp of the log entry (ISO 8601 format recommended). Do not fabricate or infer timestamps; use only actual log data."
+          },
+          "level": {
+            "type": "string",
+            "description": "Severity level (e.g., INFO, WARN, ERROR). Do not hallucinate severity; use only what is present in the logs."
+          },
+          "message": {
+            "type": "string",
+            "description": "The content of the log entry. Do not invent or alter log messages; use only the actual log content."
+          },
+          "source": {
+            "type": "string",
+            "description": "Origin of the log (e.g., component, service, filename). Do not guess or hallucinate sources; use only explicit log information."
+          }
+        },
+        "required": ["timestamp", "level", "message"]
+      }
+    },
+    "patterns": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "description": "Notable pattern or anomaly identified in the logs. Do not infer patterns not present; only describe what is actually observed."
+      },
+      "description": "Patterns, trends, or anomalies noticed during log review. Avoid speculation; only document verifiable findings."
+    },
+    "possible_root_causes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "cause": {
+            "type": "string",
+            "description": "Potential root cause inferred from the logs. Do not hallucinate causes; base all inferences on actual log evidence."
+          },
+          "confidence_score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Confidence score (0 to 1) for this root cause. Do not misrepresent confidence; score must reflect evidence strength."
+          }
+        },
+        "required": ["cause", "confidence_score"]
+      },
+      "description": "List of possible root causes for the issue, with confidence scores. Do not fabricate causes or scores; use only what is supported by the logs."
+    },
+    "next_steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "step": {
+            "type": "string",
+            "description": "Suggested action to debug or resolve the identified issue. Do not hallucinate steps; suggestions must be based on log evidence."
+          },
+          "confidence_score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Confidence score (0 to 1) for this next step. Do not misrepresent confidence; score must reflect evidence strength."
+          }
+        },
+        "required": ["step", "confidence_score"]
+      },
+      "description": "Recommended next steps based on the log analysis, with confidence scores. Do not fabricate steps or scores; use only what is supported by the logs."
+    },
+    "observations": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "description": "Additional notes or relevant context found during debugging. Do not hallucinate or invent context; only document what is actually observed."
+      },
+      "description": "Any extra observations from the debugging process. Avoid speculation; only document verifiable findings."
+    },
+    "missing_information": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "description": "A description of a piece of required information that is missing. Do not hallucinate missing information; only list what is truly absent and needed."
+      },
+      "description": "Required information that is missing or needed for better analysis. Do not fabricate gaps; only document actual missing data."
+    }
+  },
+  "required": [
+    "log_entries",
+    "patterns",
+    "possible_root_causes",
+    "next_steps",
+    "missing_information"
+  ]
+}

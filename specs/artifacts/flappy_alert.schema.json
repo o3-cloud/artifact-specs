@@ -4,39 +4,38 @@
     "description": "Schema for reporting and analyzing flappy/noisy alerts detected in monitoring systems.",
     "type": "object",
     "properties": {
-        "artifact_name": {
-            "type": "string",
-            "const": "Flappy Alert Report"
-        },
-        "artifact_purpose": {
-            "type": "string",
-            "description": "Purpose of the report."
-        },
-        "artifact_audience": {
-            "type": "string",
-            "description": "Intended audience for the report."
-        },
         "alert_summary": {
             "type": "object",
             "properties": {
                 "monitor_name": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Exact name of the monitoring alert as it appears in the monitoring system. Must not be fabricated.",
+                    "maxLength": 150,
+                    "minLength": 1
                 },
                 "condition": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Actual condition that triggers the alert. Must be based on real monitoring configuration, not assumed.",
+                    "maxLength": 300,
+                    "minLength": 1
                 },
                 "trigger_value": {
-                    "type": "number"
+                    "type": "number",
+                    "description": "Actual numeric threshold that triggers the alert. Must be from real monitoring data."
                 },
                 "recovery_value": {
-                    "type": "number"
+                    "type": "number",
+                    "description": "Actual numeric threshold for alert recovery. Must be from real monitoring configuration."
                 },
                 "alert_links": {
                     "type": "array",
+                    "description": "Valid URLs to actual alert instances or monitoring dashboards. All links must be verified and accessible.",
                     "items": {
                         "type": "string",
                         "format": "uri"
-                    }
+                    },
+                    "maxItems": 10,
+                    "minItems": 1
                 }
             },
             "required": [
@@ -51,10 +50,16 @@
             "type": "object",
             "properties": {
                 "flap_reason": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Factual analysis of why the alert is flapping based on observable data and patterns. Must avoid speculation and focus on verifiable causes.",
+                    "maxLength": 500,
+                    "minLength": 10
                 },
                 "impact": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Measurable impact of the flappy alert on systems and teams. Must be based on actual metrics or documented incidents, not assumptions.",
+                    "maxLength": 400,
+                    "minLength": 10
                 }
             },
             "required": [
@@ -64,24 +69,34 @@
         },
         "recommendations": {
             "type": "array",
+            "description": "Actionable recommendations based on analysis. Each recommendation must be specific, implementable, and directly related to the flapping issue.",
             "items": {
-                "type": "string"
-            }
+                "type": "string",
+                "maxLength": 300,
+                "minLength": 10
+            },
+            "maxItems": 8,
+            "minItems": 1
         },
         "next_actions": {
             "type": "array",
+            "description": "Concrete next steps with clear ownership and timelines. Must be realistic and achievable actions, not vague suggestions.",
             "items": {
-                "type": "string"
-            }
+                "type": "string",
+                "maxLength": 200,
+                "minLength": 5
+            },
+            "maxItems": 6,
+            "minItems": 1
         },
         "feedback_mechanism": {
-            "type": "string"
+            "type": "string",
+            "description": "Specific method for providing feedback on this report. Must include actual contact information or system references, not generic placeholders.",
+            "maxLength": 150,
+            "minLength": 10
         }
     },
     "required": [
-        "artifact_name",
-        "artifact_purpose",
-        "artifact_audience",
         "alert_summary",
         "analysis",
         "recommendations",
