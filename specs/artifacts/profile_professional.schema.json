@@ -1,0 +1,76 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Professional Contact",
+  "description": "A simplified schema for a professional contact profile (not employee-specific)",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Full name of the contact"
+    },
+    "preferredName": {
+      "type": "string",
+      "description": "Name they prefer to be called"
+    },
+    "pronouns": {
+      "type": "string",
+      "description": "Preferred pronouns (e.g., he/him, she/her, they/them)"
+    },
+    "location": {
+      "type": "object",
+      "properties": {
+        "city": { "type": "string" },
+        "state": { "type": "string" },
+        "country": { "type": "string" },
+        "timezone": { "type": "string", "description": "Timezone identifier (e.g., America/New_York)" }
+      }
+    },
+    "contact": {
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "format": "email" },
+        "phone": { "type": "string" },
+        "linkedin": { "type": "string", "format": "uri" },
+        "website": { "type": "string", "format": "uri" },
+        "github": { "type": "string", "format": "uri" }
+      }
+    },
+    "summary": {
+      "type": "string",
+      "description": "Short professional summary or bio"
+    },
+    "skills": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Key skills or areas of expertise"
+    },
+    "languages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "language": { "type": "string" },
+          "proficiency": { "type": "string", "enum": ["basic", "conversational", "fluent", "native"] }
+        },
+        "required": ["language", "proficiency"]
+      },
+      "description": "Languages spoken and proficiency"
+    },
+    "certifications": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "issuer": { "type": "string" },
+          "issueDate": { "type": "string", "format": "date" },
+          "expirationDate": { "type": "string", "format": "date" },
+          "credentialId": { "type": "string" }
+        },
+        "required": ["name", "issuer"]
+      },
+      "description": "Professional certifications"
+    }
+  },
+  "required": ["name"]
+}
