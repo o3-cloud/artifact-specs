@@ -1,0 +1,68 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DailyBrief",
+  "type": "object",
+  "description": "Schema describing a concise daily summary of key updates, priorities, and events. All content must be factual, concise, and avoid hallucinations or unsupported information.",
+  "properties": {
+    "date": {
+      "type": "string",
+      "description": "The date the daily brief covers (ISO 8601 format). Must be accurate and not fabricated.",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "summary": {
+      "type": "string",
+      "description": "High-level overview of the day’s key themes and developments. Avoid speculation and ensure all information is verifiable."
+    },
+    "top_updates": {
+      "type": "array",
+      "description": "List of the most important updates for the day. Only include updates that are confirmed and factual.",
+      "items": { "type": "string" }
+    },
+    "priorities": {
+      "type": "array",
+      "description": "List of priority tasks or goals for the day. Do not include tasks that are speculative or unsupported.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "task": {
+            "type": "string",
+            "description": "Description of the priority item. Must be based on actual plans or assignments."
+          },
+          "status": {
+            "type": "string",
+            "enum": ["not started", "in progress", "complete"]
+          }
+        },
+        "required": ["task"]
+      }
+    },
+    "events": {
+      "type": "array",
+      "description": "Notable meetings, deadlines, or other scheduled events. Only include events that are scheduled and confirmed.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "time": {
+            "type": "string",
+            "description": "Time of the event (HH:MM, 24-hour format). Must be accurate and not fabricated."
+          },
+          "description": {
+            "type": "string",
+            "description": "Brief description of the event. Avoid hallucinated or speculative events."
+          }
+        },
+        "required": ["description"]
+      }
+    },
+    "risks": {
+      "type": "array",
+      "description": "Potential risks or issues to monitor today. Only include risks that are substantiated and relevant.",
+      "items": { "type": "string" }
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional context, reminders, or observations. Do not include hallucinated, speculative, or unsupported information."
+    }
+  },
+  "required": ["date", "summary", "top_updates", "priorities"]
+}
