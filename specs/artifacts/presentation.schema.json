@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SimplePresentation",
+  "type": "object",
+  "description": "A simplified schema describing a presentation with basic metadata and slides.",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Title of the presentation."
+    },
+    "author": {
+      "type": "string",
+      "description": "Name of the presentation's author."
+    },
+    "date": {
+      "type": "string",
+      "description": "Date of the presentation in ISO 8601 format (YYYY-MM-DD).",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "slides": {
+      "type": "array",
+      "description": "List of slides in the presentation.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Slide title or heading."
+          },
+          "content": {
+            "type": "string",
+            "description": "Main content of the slide, plain text or markdown."
+          },
+          "notes": {
+            "type": "string",
+            "description": "Optional speaker notes."
+          }
+        },
+        "required": ["title", "content"]
+      }
+    }
+  },
+  "required": ["title", "slides"]
+}
