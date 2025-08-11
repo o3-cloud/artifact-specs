@@ -1,0 +1,99 @@
+{
+  "title": "Engineering Team Meeting - Q4 Planning",
+  "date": "2024-12-15",
+  "duration": "90 minutes",
+  "location": "Conference Room B / Zoom",
+  "attendees": [
+    {
+      "name": "Sarah Chen",
+      "role": "Team Lead"
+    },
+    {
+      "name": "Mike Rodriguez", 
+      "role": "Senior Developer"
+    },
+    {
+      "name": "Emily Zhang",
+      "role": "Product Manager"
+    },
+    {
+      "name": "Alex Thompson",
+      "role": "DevOps Engineer"
+    },
+    {
+      "name": "Lisa Park",
+      "role": "QA Engineer"
+    }
+  ],
+  "agenda_items": [
+    {
+      "title": "Q4 Performance Review",
+      "key_points": [
+        "95% sprint completion rate",
+        "3 major features delivered", 
+        "Customer satisfaction score: 4.7/5"
+      ],
+      "decisions": ["Approved Q4 bonus allocation for the team"]
+    },
+    {
+      "title": "2025 Planning Discussion",
+      "key_points": [
+        "AI-powered search feature (Q1 priority)",
+        "Mobile app redesign (Q2)",
+        "API v3 development (Q2-Q3)"
+      ]
+    },
+    {
+      "title": "Infrastructure Updates",
+      "key_points": [
+        "Migration to AWS EKS completed",
+        "New monitoring dashboard deployed",
+        "Security audit findings addressed"
+      ]
+    },
+    {
+      "title": "Team Process Improvements", 
+      "key_points": [
+        "Implemented automated testing pipeline",
+        "Reduced deployment time from 2 hours to 30 minutes",
+        "Code review process streamlined"
+      ]
+    }
+  ],
+  "decisions": [
+    "Proceed with AI search feature as top Q1 priority",
+    "Allocate 2 developers to mobile redesign project", 
+    "Schedule monthly infrastructure reviews"
+  ],
+  "action_items": [
+    {
+      "assignee": "Sarah",
+      "task": "Create AI search technical specs",
+      "due_date": "2025-01-15"
+    },
+    {
+      "assignee": "Mike", 
+      "task": "Research mobile frameworks",
+      "due_date": "2024-12-22"
+    },
+    {
+      "assignee": "Alex",
+      "task": "API performance audit", 
+      "due_date": "2025-01-10"
+    },
+    {
+      "assignee": "Emily",
+      "task": "Schedule infrastructure review meeting",
+      "due_date": "2024-12-31"
+    },
+    {
+      "assignee": "Lisa",
+      "task": "Document new testing processes",
+      "due_date": "2025-01-05"
+    }
+  ],
+  "next_meeting": {
+    "date": "2025-01-15",
+    "focus": "Q1 Sprint Planning and AI Search Technical Review"
+  }
+}

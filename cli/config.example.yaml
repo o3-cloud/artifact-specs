@@ -1,0 +1,48 @@
+# Example configuration file for artifact-specs CLI
+# Copy this to ~/.artifactspecs/config.yaml and customize as needed
+
+# LLM Configuration
+model: "openai/gpt-4o-mini"
+base_url: "https://openrouter.ai/api/v1"
+provider: "openrouter"
+system_prompt_file: ""
+
+# Prompt Templates
+# Use Go template syntax with variables: {{.Variable}}
+prompts:
+  # Extraction prompt template
+  # Available variables: {{.SchemaTitle}}, {{.Input}}, {{.Schema}}
+  extraction: |
+    Extract structured data from the following input according to the "{{.SchemaTitle}}" specification.
+
+    Instructions:
+    - Extract only information that is explicitly present in the input
+    - Do not invent or infer information not directly stated
+    - Leave fields empty/null if the information is not available
+    - Follow the JSON schema structure exactly
+    - Ensure all required fields are present
+
+    Input:
+    {{.Input}}
+
+    JSON Schema Reference:
+    {{.Schema}}
+
+    Provide the extracted data as valid JSON:
+
+  # Verbalization prompt template  
+  # Available variables: {{.JSONData}}
+  verbalization: |
+    Convert the following structured JSON data into clear, readable Markdown format.
+
+    Requirements:
+    - Use appropriate Markdown formatting (headers, lists, tables, etc.)
+    - Present the information in a logical, easy-to-read structure
+    - Include only the information present in the JSON data
+    - Do not add commentary or extra headings beyond what the data implies
+    - Maintain accuracy to the original data
+
+    JSON Data:
+    {{.JSONData}}
+
+    Generate well-formatted Markdown:

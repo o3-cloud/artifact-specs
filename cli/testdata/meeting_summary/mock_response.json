@@ -1,0 +1,35 @@
+{
+  "title": "Engineering Team Meeting - Q4 Planning",
+  "date": "2024-12-15", 
+  "duration": "90 minutes",
+  "location": "Conference Room B / Zoom",
+  "attendees": [
+    {
+      "name": "Sarah Chen",
+      "role": "Team Lead"
+    },
+    {
+      "name": "Mike Rodriguez",
+      "role": "Senior Developer" 
+    }
+  ],
+  "agenda_items": [
+    {
+      "title": "Q4 Performance Review",
+      "key_points": ["95% sprint completion rate"],
+      "decisions": ["Approved Q4 bonus allocation"]
+    }
+  ],
+  "decisions": ["Proceed with AI search feature"],
+  "action_items": [
+    {
+      "assignee": "Sarah",
+      "task": "Create technical specs",
+      "due_date": "2025-01-15"
+    }
+  ],
+  "next_meeting": {
+    "date": "2025-01-15",
+    "focus": "Q1 Sprint Planning"
+  }
+}

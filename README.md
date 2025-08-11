@@ -103,3 +103,23 @@ specs/
 | `reframe` | Perspective shifting | Stakeholder analysis, alternative viewpoints |
 
 The specs system transforms unstructured content into structured, actionable data—making your pAI agents more analytical, precise, and valuable for complex workflows.
+
+## CLI Tool: `aspec`
+
+This repository includes a powerful command-line interface, `aspec`, for working with the pAI Specs System.
+
+**`aspec`** is a Go-based CLI that transforms artifact/extractor JSON Schemas from `o3-cloud/artifact-specs` into:
+
+- A plain-English prompt
+- A JSON extraction from unstructured input (via LLM, with optional validation)
+- A plain-English Markdown rendering (via JSON → LLM verbalization)
+
+### Installation
+
+To install the `aspec` CLI, run the following command:
+
+```bash
+go install github.com/o3-cloud/artifact-specs/cli/cmd/aspec@latest
+```
+
+For detailed usage and command reference, see the [CLI README](./cli/README.md).
