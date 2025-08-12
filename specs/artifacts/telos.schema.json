@@ -1,0 +1,79 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "TelosFile",
+  "type": "object",
+  "description": "Lightweight structure for a Telos file.",
+  "properties": {
+    "name": { "type": "string", "description": "Name of person, team, or project." },
+    "type": {
+      "type": "string",
+      "enum": ["personal", "team", "organization", "project"],
+      "description": "Scope of this Telos file."
+    },
+    "purpose": { "type": "string", "description": "Why this entity exists." },
+    "mission": { "type": "string", "description": "Concise mission statement." },
+    "principles": {
+      "type": "array",
+      "description": "Core values or guiding principles.",
+      "items": { "type": "string" }
+    },
+    "goals": {
+      "type": "array",
+      "description": "Key goals to achieve.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "targetDate": { "type": "string", "format": "date" }
+        },
+        "required": ["title"]
+      }
+    },
+    "metrics": {
+      "type": "array",
+      "description": "How success is measured.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "target": { "type": "string" }
+        },
+        "required": ["name"]
+      }
+    },
+    "problems": {
+      "type": "array",
+      "description": "Main challenges to solve.",
+      "items": { "type": "string" }
+    },
+    "strategies": {
+      "type": "array",
+      "description": "Approaches to achieve goals.",
+      "items": { "type": "string" }
+    },
+    "initiatives": {
+      "type": "array",
+      "description": "Projects or efforts in progress.",
+      "items": { "type": "string" }
+    },
+    "risks": {
+      "type": "array",
+      "description": "Potential issues or threats.",
+      "items": { "type": "string" }
+    },
+    "journal": {
+      "type": "array",
+      "description": "Chronological notes or updates.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "date": { "type": "string", "format": "date" },
+          "entry": { "type": "string" }
+        },
+        "required": ["date", "entry"]
+      }
+    }
+  },
+  "required": ["name", "type", "purpose"]
+}
