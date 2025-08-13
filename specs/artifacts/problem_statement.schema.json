@@ -1,0 +1,49 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ProblemStatement",
+  "type": "object",
+  "required": ["title", "summary", "evidence", "implications"],
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Short, descriptive name of the problem. Do not speculate or hallucinate; use only information directly supported by evidence or source material."
+    },
+    "summary": {
+      "type": "string",
+      "description": "Brief description of the problem. Avoid unsupported assumptions or hallucinations; summarize only what is known and evidenced."
+    },  
+    "evidence": {
+      "type": "array",
+      "description": "Key facts, observations, or code references showing the problem exists. Do not invent evidence; only include verifiable and directly supported information.",
+      "items": {
+        "type": "object",
+        "required": ["description"],
+        "properties": {
+          "description": { "type": "string", "description": "Description of the evidence. Avoid speculation or unsupported claims." },
+          "reference": {
+            "type": "string",
+            "description": "Optional file path, line numbers, or URL. Only include if directly relevant and accurate."
+          }
+        }
+      }
+    },
+    "implications": {
+      "type": "array",
+      "description": "Consequences or risks if the problem is not fixed. Do not speculate beyond what is supported by the evidence provided.",
+      "items": { "type": "string", "description": "Describe only realistic, evidence-based implications." }
+    },
+    "example": {
+      "type": "string",
+      "description": "Short reproducible example or scenario. Do not fabricate examples; use only real, directly relevant scenarios."
+    },
+    "impact": {
+      "type": "string",
+      "description": "Scope or severity of the problem. Avoid exaggeration or minimization; base the impact on factual evidence."
+    },
+    "next_steps": {
+      "type": "array",
+      "description": "Optional suggested actions. Only suggest actionable, realistic steps that are supported by the context; do not hallucinate solutions.",
+      "items": { "type": "string", "description": "Actionable, realistic next step. Avoid unsupported or speculative suggestions." }
+    }
+  }
+}
