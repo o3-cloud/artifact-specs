@@ -1,0 +1,168 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "RootCauseAnalysis",
+  "description": "A lightweight schema for quick, practical RCAs. Do not include information that is not present in the source. Avoid speculation and hallucination.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["title", "problem", "timeline", "root_cause", "actions"],
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Short title for the incident/RCA. Do not include information that is not present in the source. Avoid speculation and hallucination."
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Document creation time. Do not include information that is not present in the source. Avoid speculation and hallucination."
+    },
+    "owner": {
+      "type": "string",
+      "description": "Primary person responsible for this RCA (name or email). Do not include information that is not present in the source. Avoid speculation and hallucination."
+    },
+
+    "problem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["summary", "start_time"],
+      "properties": {
+        "summary": {
+          "type": "string",
+          "description": "Clear, concise description of the observed issue. Do not include information that is not present in the source. Avoid speculation and hallucination."
+        },
+        "start_time": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When impact started (best known). Do not include information that is not present in the source. Avoid speculation and hallucination."
+        },
+        "end_time": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When impact ended (if applicable). Do not include information that is not present in the source. Avoid speculation and hallucination."
+        },
+        "severity": {
+          "type": "string",
+          "enum": ["SEV0", "SEV1", "SEV2", "SEV3", "SEV4", "Unknown"],
+          "description": "Impact severity. Do not include information that is not present in the source. Avoid speculation and hallucination."
+        },
+        "impact": {
+          "type": "string",
+          "description": "Brief narrative of user/business impact. Do not include information that is not present in the source. Avoid speculation and hallucination."
+        }
+      }
+    },
+
+    "timeline": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Key events in chronological order. Do not include information that is not present in the source. Avoid speculation and hallucination.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["time", "description"],
+        "properties": {
+          "time": { "type": "string", "format": "date-time" },
+          "type": {
+            "type": "string",
+            "description": "Optional event category. Do not include information that is not present in the source. Avoid speculation and hallucination.",
+            "enum": [
+              "signal",
+              "detection",
+              "mitigation",
+              "investigation",
+              "change",
+              "communication",
+              "resolution",
+              "other"
+            ]
+          },
+          "description": { "type": "string" },
+          "link": {
+            "type": "string",
+            "format": "uri",
+            "description": "Optional URL to logs, dashboards, PRs, etc. Do not include information that is not present in the source. Avoid speculation and hallucination."
+          }
+        }
+      }
+    },
+
+    "evidence": {
+      "type": "array",
+      "description": "Optional supporting artifacts (links or short notes). Do not include information that is not present in the source. Avoid speculation and hallucination.",
+      "items": {
+        "type": "string"
+      }
+    },
+
+    "root_cause": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["statement"],
+      "properties": {
+        "statement": {
+          "type": "string",
+          "description": "Single sentence explaining the underlying cause. Do not include information that is not present in the source. Avoid speculation and hallucination."
+        },
+        "contributing_factors": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Optional list of contributing conditions. Do not include information that is not present in the source. Avoid speculation and hallucination."
+        }
+      }
+    },
+
+    "actions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["corrective"],
+      "properties": {
+        "corrective": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Steps to fix or contain the issue. Do not include information that is not present in the source. Avoid speculation and hallucination.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["title", "owner", "status"],
+            "properties": {
+              "title": { "type": "string" },
+              "owner": {
+                "type": "string",
+                "description": "Person or team. Do not include information that is not present in the source. Avoid speculation and hallucination."
+              },
+              "status": {
+                "type": "string",
+                "enum": ["planned", "in_progress", "blocked", "done"]
+              },
+              "due_date": { "type": "string", "format": "date-time" }
+            }
+          }
+        },
+        "preventive": {
+          "type": "array",
+          "description": "Optional steps to prevent recurrence. Do not include information that is not present in the source. Avoid speculation and hallucination.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["title", "owner"],
+            "properties": {
+              "title": { "type": "string" },
+              "owner": { "type": "string" },
+              "due_date": { "type": "string", "format": "date-time" }
+            }
+          }
+        }
+      }
+    },
+
+    "verification": {
+      "type": "string",
+      "description": "How you verified the fix/prevention worked (or plan to verify). Do not include information that is not present in the source. Avoid speculation and hallucination."
+    },
+
+    "lessons_learned": {
+      "type": "array",
+      "description": "Optional key takeaways. Do not include information that is not present in the source. Avoid speculation and hallucination.",
+      "items": { "type": "string" }
+    }
+  }
+}
