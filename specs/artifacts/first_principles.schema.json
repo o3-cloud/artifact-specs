@@ -1,0 +1,72 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "FirstPrinciplesThinking",
+  "description": "A framework for capturing and applying first principles thinking.",
+  "type": "object",
+  "required": ["challenge", "principles", "assumptions", "decomposition", "options", "decision"],
+  "properties": {
+    "challenge": {
+      "type": "object",
+      "required": ["question", "objective"],
+      "properties": {
+        "question": { "type": "string", "description": "The fundamental question to answer." },
+        "objective": { "type": "string", "description": "Desired outcome." }
+      }
+    },
+    "principles": {
+      "type": "array",
+      "description": "Core truths that guide reasoning.",
+      "items": {
+        "type": "object",
+        "required": ["statement"],
+        "properties": {
+          "statement": { "type": "string" },
+          "evidence": { "type": "string" }
+        }
+      }
+    },
+    "assumptions": {
+      "type": "array",
+      "description": "Beliefs to validate or challenge.",
+      "items": {
+        "type": "object",
+        "required": ["statement"],
+        "properties": {
+          "statement": { "type": "string" },
+          "validation_plan": { "type": "string" }
+        }
+      }
+    },
+    "decomposition": {
+      "type": "array",
+      "description": "Breakdown into subproblems.",
+      "items": {
+        "type": "object",
+        "required": ["description"],
+        "properties": {
+          "description": { "type": "string" }
+        }
+      }
+    },
+    "options": {
+      "type": "array",
+      "description": "Solution ideas built from first principles.",
+      "items": {
+        "type": "object",
+        "required": ["description"],
+        "properties": {
+          "description": { "type": "string" },
+          "tradeoffs": { "type": "string" }
+        }
+      }
+    },
+    "decision": {
+      "type": "object",
+      "required": ["choice", "justification"],
+      "properties": {
+        "choice": { "type": "string", "description": "Selected option description or ID." },
+        "justification": { "type": "string", "description": "Why this follows from principles." }
+      }
+    }
+  }
+}
