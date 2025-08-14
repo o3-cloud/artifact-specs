@@ -1,0 +1,315 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CriticalThinkingRecord",
+  "description": "A structured record that captures the key components of a critical thinking process: framing a question, gathering evidence, reasoning, considering alternatives, and arriving at a conclusion with justified confidence.",
+  "type": "object",
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "description": "Authorship and timing details.",
+      "properties": {
+        "author": { "type": "string" },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp when this record was created."
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp when this record was last updated."
+        }
+      }
+    },
+    "context": {
+      "type": "object",
+      "description": "Background and scope of the problem/claim under analysis.",
+      "properties": {
+        "objective": {
+          "type": "string",
+          "description": "What you’re trying to decide, judge, or understand."
+        },
+        "key_question": {
+          "type": "string",
+          "description": "The central question framed clearly and neutrally."
+        },
+        "scope": {
+          "type": "object",
+          "properties": {
+            "in_scope": { "type": "array", "items": { "type": "string" } },
+            "out_of_scope": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "stakeholders": { "type": "array", "items": { "type": "string" } },
+        "constraints": { "type": "array", "items": { "type": "string" } },
+        "assumptions": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["objective", "key_question"]
+    },
+    "claims": {
+      "type": "array",
+      "description": "Statements to evaluate (hypotheses, facts, or recommendations).",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-zA-Z0-9_\\-]+$" },
+          "statement": { "type": "string" },
+          "type": {
+            "type": "string",
+            "enum": ["hypothesis", "fact", "opinion", "recommendation"]
+          },
+          "confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Current belief in this claim before final synthesis."
+          },
+          "notes": { "type": "string" }
+        },
+        "required": ["id", "statement", "type"]
+      },
+      "minItems": 1
+    },
+    "evidence": {
+      "type": "array",
+      "description": "Evidence gathered and assessed for quality and relevance.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-zA-Z0-9_\\-]+$" },
+          "summary": { "type": "string" },
+          "type": {
+            "type": "string",
+            "enum": [
+              "data",
+              "document",
+              "observation",
+              "experiment",
+              "expert_opinion",
+              "model_output",
+              "anecdote",
+              "other"
+            ]
+          },
+          "source": {
+            "type": "object",
+            "properties": {
+              "title": { "type": "string" },
+              "url": { "type": "string", "format": "uri" },
+              "accessed_at": { "type": "string", "format": "date-time" },
+              "citation": { "type": "string" }
+            }
+          },
+          "reliability": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "How trustworthy is this evidence?"
+          },
+          "relevance": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "How relevant is this evidence to the key question?"
+          },
+          "supports_claims": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "IDs of claims this evidence supports."
+          },
+          "undermines_claims": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "IDs of claims this evidence weakens."
+          },
+          "notes": { "type": "string" }
+        },
+        "required": ["id", "summary", "type"]
+      }
+    },
+    "analysis": {
+      "type": "object",
+      "description": "Reasoning process, alternatives considered, and quality checks.",
+      "properties": {
+        "reasoning_steps": {
+          "type": "array",
+          "description": "Traceable steps connecting evidence to claims.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "description": { "type": "string" },
+              "method": {
+                "type": "string",
+                "enum": [
+                  "deduction",
+                  "induction",
+                  "abduction",
+                  "analogy",
+                  "causal",
+                  "statistical",
+                  "bayesian_update",
+                  "other"
+                ]
+              },
+              "inputs": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "type": { "type": "string", "enum": ["claim", "evidence"] },
+                    "id": { "type": "string" }
+                  },
+                  "required": ["type", "id"]
+                }
+              },
+              "output_claim": {
+                "type": "string",
+                "description": "Claim ID, if step yields or updates a claim."
+              },
+              "assumptions": { "type": "array", "items": { "type": "string" } },
+              "quality_notes": { "type": "string" }
+            },
+            "required": ["description"]
+          }
+        },
+        "alternatives": {
+          "type": "array",
+          "description": "Plausible alternative explanations or options.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "rationale": { "type": "string" },
+              "pros": { "type": "array", "items": { "type": "string" } },
+              "cons": { "type": "array", "items": { "type": "string" } },
+              "risks": { "type": "array", "items": { "type": "string" } },
+              "score": {
+                "type": "number",
+                "description": "Relative score based on your criteria (e.g., 0–10)."
+              }
+            },
+            "required": ["name", "rationale"]
+          }
+        },
+        "criteria": {
+          "type": "array",
+          "description": "Decision or evaluation criteria (optional weights).",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "weight": { "type": "number", "minimum": 0, "maximum": 1 }
+            },
+            "required": ["name"]
+          }
+        },
+        "counterarguments": {
+          "type": "array",
+          "description": "Strong objections to preferred claims or conclusions.",
+          "items": { "type": "string" }
+        },
+        "biases_detected": {
+          "type": "array",
+          "description": "Cognitive biases noticed during analysis.",
+          "items": {
+            "type": "string",
+            "enum": [
+              "confirmation_bias",
+              "anchoring",
+              "availability",
+              "overconfidence",
+              "authority_bias",
+              "framing_effect",
+              "sunk_cost",
+              "status_quo_bias",
+              "hindsight_bias",
+              "selection_bias",
+              "other"
+            ]
+          }
+        },
+        "fallacies_detected": {
+          "type": "array",
+          "description": "Logical fallacies identified.",
+          "items": {
+            "type": "string",
+            "enum": [
+              "ad_hominem",
+              "strawman",
+              "false_dilemma",
+              "slippery_slope",
+              "circular_reasoning",
+              "hasty_generalization",
+              "appeal_to_authority",
+              "appeal_to_emotion",
+              "post_hoc",
+              "composition_division",
+              "equivocation",
+              "other"
+            ]
+          }
+        }
+      }
+    },
+    "synthesis": {
+      "type": "object",
+      "description": "Final judgment drawn from the analysis.",
+      "properties": {
+        "conclusion": {
+          "type": "string",
+          "description": "Clear, testable conclusion that answers the key question."
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Overall confidence in the conclusion (0–1)."
+        },
+        "justification": {
+          "type": "string",
+          "description": "Why this conclusion follows from the strongest evidence and reasoning."
+        },
+        "limitations": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Limits of the conclusion and where it may not apply."
+        }
+      },
+      "required": ["conclusion", "confidence"]
+    },
+    "next_steps": {
+      "type": "array",
+      "description": "Actions to validate, monitor, or implement the decision.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "action": { "type": "string" },
+          "owner": { "type": "string" },
+          "due": { "type": "string", "format": "date-time" },
+          "metric_of_success": { "type": "string" }
+        },
+        "required": ["action"]
+      }
+    },
+    "open_questions": {
+      "type": "array",
+      "description": "Unknowns that merit further investigation.",
+      "items": { "type": "string" }
+    },
+    "references": {
+      "type": "array",
+      "description": "Bibliography and sources cited.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" },
+          "url": { "type": "string", "format": "uri" },
+          "accessed_at": { "type": "string", "format": "date-time" },
+          "citation": { "type": "string" }
+        },
+        "required": ["title"]
+      }
+    }
+  },
+  "required": ["context", "claims", "evidence", "synthesis"]
+}
