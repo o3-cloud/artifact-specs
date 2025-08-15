@@ -19,7 +19,7 @@
       "description": "List of top priorities for the day.",
       "items": {
         "type": "string",
-      "description": "A priority task or goal. Must be factual and not hallucinated."
+        "description": "A priority task or goal. Must be factual and not hallucinated."
       }
     },
     "key_updates": {
@@ -31,17 +31,18 @@
         "properties": {
           "title": {
             "type": "string",
-        "description": "Short title of the update. Do not hallucinate or fabricate titles."
+            "description": "Short title of the update. Do not hallucinate or fabricate titles."
           },
           "details": {
             "type": "string",
-        "description": "Detailed explanation of the update. Ensure all details are accurate and verifiable. Do not include hallucinated or fabricated information."
+            "description": "Detailed explanation of the update. Ensure all details are accurate and verifiable. Do not include hallucinated or fabricated information."
           },
           "source": {
             "type": "string",
-        "description": "Optional source or reference link. If provided, must be real and verifiable. Do not hallucinate sources."
+            "description": "Optional source or reference link. If provided, must be real and verifiable. Do not hallucinate sources."
           }
-        }
+        },
+        "additionalProperties": false
       }
     },
     "reminders": {
@@ -49,7 +50,7 @@
       "description": "Any reminders, deadlines, or follow-ups for today.",
       "items": {
         "type": "string",
-      "description": "A reminder item. Must be factual and not hallucinated."
+        "description": "A reminder item. Must be factual and not hallucinated."
       }
     },
     "calendar_events": {
@@ -61,15 +62,15 @@
         "properties": {
           "time": {
             "type": "string",
-        "description": "Event time in HH:MM format. Do not hallucinate or fabricate times."
+            "description": "Event time in HH:MM format. Do not hallucinate or fabricate times."
           },
           "event": {
             "type": "string",
-        "description": "Description of the event. Must be factual and not hallucinated."
+            "description": "Description of the event. Must be factual and not hallucinated."
           },
           "location": {
             "type": "string",
-        "description": "Optional location of the event. If provided, must be real and verifiable. Do not hallucinate locations."
+            "description": "Optional location of the event. If provided, must be real and verifiable. Do not hallucinate locations."
           }
         }
       }
