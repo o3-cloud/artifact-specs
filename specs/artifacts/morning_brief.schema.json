@@ -3,7 +3,14 @@
   "title": "MorningBrief",
   "description": "Structured daily morning brief containing key updates, priorities, and reminders. All content must be factual, verifiable, and free from hallucinations or fabricated information.",
   "type": "object",
-  "required": ["date", "summary", "priorities", "key_updates"],
+  "required": [
+    "date",
+    "summary",
+    "priorities",
+    "key_updates",
+    "reminders",
+    "calendar_events"
+  ],
   "properties": {
     "date": {
       "type": "string",
@@ -27,7 +34,7 @@
       "description": "Important updates or developments since the last brief.",
       "items": {
         "type": "object",
-        "required": ["title", "details"],
+        "required": ["title", "details", "source"],
         "properties": {
           "title": {
             "type": "string",
@@ -58,7 +65,7 @@
       "description": "Key events scheduled for today.",
       "items": {
         "type": "object",
-        "required": ["time", "event"],
+        "required": ["time", "event", "location"],
         "properties": {
           "time": {
             "type": "string",
@@ -72,7 +79,8 @@
             "type": "string",
             "description": "Optional location of the event. If provided, must be real and verifiable. Do not hallucinate locations."
           }
-        }
+        },
+        "additionalProperties": false
       }
     }
   }
