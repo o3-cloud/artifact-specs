@@ -42,33 +42,33 @@ func runListCommand(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to list specs: %w", err)
 	}
 	
-	if jsonOutput {
-		data, err := json.MarshalIndent(specList, "", "  ")
-		if err != nil {
-			return fmt.Errorf("failed to marshal JSON: %w", err)
-		}
-		fmt.Println(string(data))
-		return nil
-	}
+    if jsonOutput {
+        data, err := json.MarshalIndent(specList, "", "  ")
+        if err != nil {
+            return fmt.Errorf("failed to marshal JSON: %w", err)
+        }
+        fmt.Println(string(data))
+        return nil
+    }
 	
-	if yamlOutput {
-		data, err := yaml.Marshal(specList)
-		if err != nil {
-			return fmt.Errorf("failed to marshal YAML: %w", err)
-		}
-		fmt.Print(string(data))
-		return nil
-	}
+    if yamlOutput {
+        data, err := yaml.Marshal(specList)
+        if err != nil {
+            return fmt.Errorf("failed to marshal YAML: %w", err)
+        }
+        fmt.Print(string(data))
+        return nil
+    }
 	
 	// Table format
-	if len(specList) == 0 {
-		fmt.Printf("No %s found", specType)
-		if search != "" {
-			fmt.Printf(" matching '%s'", search)
-		}
-		fmt.Println()
-		return nil
-	}
+    if len(specList) == 0 {
+        if search != "" {
+            logging.Info("No specs found", map[string]interface{}{"type": specType, "search": search})
+        } else {
+            logging.Info("No specs found", map[string]interface{}{"type": specType})
+        }
+        return nil
+    }
 	
 	fmt.Printf("%-20s %-40s %-10s %-10s\n", "SLUG", "TITLE", "TYPE", "REF")
 	fmt.Println(strings.Repeat("-", 80))
@@ -195,14 +195,14 @@ func runPromptCommand(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to generate prompt: %w", err)
 	}
 	
-	if outputPath != "" {
-		writer := io.NewOutputWriter(outputPath)
-		if err := writer.WriteOutput(response.Content); err != nil {
-			return fmt.Errorf("failed to write output: %w", err)
-		}
-	} else if !streaming {
-		fmt.Print(response.Content)
-	}
+        if outputPath != "" {
+            writer := io.NewOutputWriter(outputPath)
+            if err := writer.WriteOutput(response.Content); err != nil {
+                return fmt.Errorf("failed to write output: %w", err)
+            }
+        } else if !streaming {
+            fmt.Print(response.Content)
+        }
 	
 	return nil
 }
@@ -283,10 +283,10 @@ func runExtractCommand(cmd *cobra.Command, args []string) error {
 				return fmt.Errorf("extraction failed: %w", err)
 			}
 
-			if !validationResult.Valid {
-				fmt.Fprintf(os.Stderr, "Warning: Final result failed validation: %s\n", validationResult.FormatErrors())
-				os.Exit(3)
-			}
+                if !validationResult.Valid {
+                    logging.Warn("Final result failed validation", map[string]interface{}{"errors": validationResult.FormatErrors()})
+                    os.Exit(3)
+                }
 		}
 	} else {
 		logging.Info("Input exceeds chunk limit, using chunked processing", map[string]interface{}{
@@ -351,19 +351,19 @@ func runExtractCommand(cmd *cobra.Command, args []string) error {
 		response = result.Stats
 
 		// Validate final result if requested
-		if !noValidate {
-			validator, err := validate.NewValidator(spec)
-			if err != nil {
-				return fmt.Errorf("failed to create validator: %w", err)
-			}
+            if !noValidate {
+                validator, err := validate.NewValidator(spec)
+                if err != nil {
+                    return fmt.Errorf("failed to create validator: %w", err)
+                }
 
-			validationResult := validator.Validate(jsonData)
-			if !validationResult.Valid {
-				fmt.Fprintf(os.Stderr, "Warning: Final result failed validation: %s\n", validationResult.FormatErrors())
-				os.Exit(3)
-			}
-		}
-	}
+                validationResult := validator.Validate(jsonData)
+                if !validationResult.Valid {
+                    logging.Warn("Final result failed validation", map[string]interface{}{"errors": validationResult.FormatErrors()})
+                    os.Exit(3)
+                }
+            }
+        }
 
 	// Format output
 	var outputData []byte
@@ -467,9 +467,9 @@ func runRenderCommand(cmd *cobra.Command, args []string) error {
 	}
 	
 	// Show stats if requested
-	if showStats && result.Stats != nil {
-		llm.PrintStats(result.Stats, os.Stderr)
-	}
+    if showStats && result.Stats != nil {
+        llm.PrintStats(result.Stats, os.Stderr)
+    }
 	
 	return nil
 }
@@ -574,11 +574,11 @@ func runValidateCommand(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("invalid JSON file: %w", err)
 	}
 	
-	if schemaURL, ok := jsonDoc["$schema"].(string); ok && schemaURL != "" {
-		// Try to load from $schema reference
-		logging.Info("Using $schema reference from JSON file", map[string]interface{}{
-			"schema": schemaURL,
-		})
+    if schemaURL, ok := jsonDoc["$schema"].(string); ok && schemaURL != "" {
+        // Try to load from $schema reference
+        logging.Info("Using $schema reference from JSON file", map[string]interface{}{
+            "schema": schemaURL,
+        })
 		
 		manager, err := specs.NewManager()
 		if err != nil {
@@ -640,7 +640,7 @@ func runUpdateCommand(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to create specs manager: %w", err)
 	}
 	
-	fmt.Printf("Updating specs from %s@%s...\n", repo.String(), ref)
+    logging.Info("Updating specs", map[string]interface{}{"repo": repo.String(), "ref": ref})
 	
 	if err := manager.UpdateSpecs(repo); err != nil {
 		return fmt.Errorf("failed to update specs: %w", err)
@@ -722,11 +722,11 @@ func runTestCommand(cmd *cobra.Command, args []string) error {
 	}
 	
 	// Compare with expected if provided
-	if expected != "" {
-		expectedData, err := os.ReadFile(expected)
-		if err != nil {
-			return fmt.Errorf("failed to read expected file: %w", err)
-		}
+            if expected != "" {
+                expectedData, err := os.ReadFile(expected)
+                if err != nil {
+                    return fmt.Errorf("failed to read expected file: %w", err)
+                }
 		
 		// Normalize JSON for comparison
 		var actualJSON, expectedJSON interface{}

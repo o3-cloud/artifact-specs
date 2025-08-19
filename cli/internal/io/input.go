@@ -1,15 +1,17 @@
 package io
 
 import (
-	"bufio"
-	"fmt"
-	"io"
-	"io/fs"
-	"mime"
-	"os"
-	"path/filepath"
-	"sort"
-	"strings"
+    "bufio"
+    "fmt"
+    "io"
+    "io/fs"
+    "mime"
+    "os"
+    "path/filepath"
+    "sort"
+    "strings"
+
+    "github.com/o3-cloud/artifact-specs/cli/internal/logging"
 )
 
 type InputReader struct {
@@ -54,10 +56,10 @@ func (r *InputReader) readStdin() (string, error) {
 }
 
 func (r *InputReader) readFile(path string) (string, error) {
-	if isBinary(path) {
-		fmt.Fprintf(os.Stderr, "Warning: Skipping binary file: %s\n", path)
-		return "", nil
-	}
+    if isBinary(path) {
+        logging.Warn("Skipping binary file", map[string]interface{}{"path": path})
+        return "", nil
+    }
 	
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -86,10 +88,10 @@ func (r *InputReader) readDirectory() (string, error) {
 		}
 		
 		// Skip binary files
-		if isBinary(path) {
-			fmt.Fprintf(os.Stderr, "Warning: Skipping binary file: %s\n", path)
-			return nil
-		}
+        if isBinary(path) {
+            logging.Warn("Skipping binary file", map[string]interface{}{"path": path})
+            return nil
+        }
 		
 		files = append(files, path)
 		return nil
@@ -115,11 +117,11 @@ func (r *InputReader) readDirectory() (string, error) {
 		content.WriteString(fmt.Sprintf("=== %s ===\n", relPath))
 		
 		// Read and append file content
-		fileContent, err := r.readFile(file)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Warning: Failed to read file %s: %v\n", file, err)
-			continue
-		}
+        fileContent, err := r.readFile(file)
+        if err != nil {
+            logging.Warn("Failed to read file", map[string]interface{}{"path": file, "error": err.Error()})
+            continue
+        }
 		
 		if fileContent != "" {
 			content.WriteString(fileContent)

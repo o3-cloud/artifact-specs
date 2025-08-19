@@ -1,12 +1,11 @@
 package main
 
 import (
-	"fmt"
-	"os"
+    "os"
 
-	"github.com/o3-cloud/artifact-specs/cli/internal/config"
-	"github.com/o3-cloud/artifact-specs/cli/internal/logging"
-	"github.com/spf13/cobra"
+    "github.com/o3-cloud/artifact-specs/cli/internal/config"
+    "github.com/o3-cloud/artifact-specs/cli/internal/logging"
+    "github.com/spf13/cobra"
 )
 
 var (
@@ -16,10 +15,10 @@ var (
 )
 
 func main() {
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-		os.Exit(1)
-	}
+    if err := rootCmd.Execute(); err != nil {
+        logging.Error("Command execution failed", map[string]interface{}{"error": err.Error()})
+        os.Exit(1)
+    }
 }
 
 var rootCmd = &cobra.Command{

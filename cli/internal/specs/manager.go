@@ -1,11 +1,11 @@
 package specs
 
 import (
-	"fmt"
-	"sort"
-	"strings"
+    "fmt"
+    "sort"
+    "strings"
 
-	"github.com/o3-cloud/artifact-specs/cli/internal/logging"
+    "github.com/o3-cloud/artifact-specs/cli/internal/logging"
 )
 
 type Manager struct {
@@ -55,8 +55,8 @@ func (m *Manager) UpdateSpecs(repo Repository) error {
 		}
 	}
 	
-	fmt.Printf("Updated %d artifacts and %d extractors\n", len(artifacts), len(extractors))
-	return nil
+    logging.Info("Specs updated", map[string]interface{}{"artifacts": len(artifacts), "extractors": len(extractors)})
+    return nil
 }
 
 func (m *Manager) ListSpecs(specType SpecType, search string) ([]*Spec, error) {
@@ -125,10 +125,10 @@ func (m *Manager) GetSpec(specType SpecType, identifier string) (*Spec, error) {
 		return nil, fmt.Errorf("multiple exact matches for '%s': %v", identifier, getSpeSlugs(exactMatches))
 	}
 	
-	if len(partialMatches) == 1 {
-		fmt.Printf("Warning: Using fuzzy match '%s' for '%s'\n", partialMatches[0].Slug, identifier)
-		return partialMatches[0], nil
-	}
+    if len(partialMatches) == 1 {
+        logging.Warn("Using fuzzy match", map[string]interface{}{"match": partialMatches[0].Slug, "requested": identifier})
+        return partialMatches[0], nil
+    }
 	
 	return nil, fmt.Errorf("multiple matches for '%s': %v", identifier, getSpeSlugs(specs))
 }

@@ -1,14 +1,15 @@
 package config
 
 import (
-	"bytes"
-	"fmt"
-	"os"
-	"path/filepath"
-	"text/template"
+    "bytes"
+    "fmt"
+    "os"
+    "path/filepath"
+    "text/template"
 
-	"github.com/spf13/viper"
-	"gopkg.in/yaml.v3"
+    "github.com/spf13/viper"
+    "gopkg.in/yaml.v3"
+    "github.com/o3-cloud/artifact-specs/cli/internal/logging"
 )
 
 type Config struct {
@@ -140,12 +141,12 @@ func CreateDefaultConfig() error {
 		return fmt.Errorf("failed to marshal default config: %w", err)
 	}
 
-	if err := os.WriteFile(configPath, configData, 0644); err != nil {
-		return fmt.Errorf("failed to write config file: %w", err)
-	}
+    if err := os.WriteFile(configPath, configData, 0644); err != nil {
+        return fmt.Errorf("failed to write config file: %w", err)
+    }
 
-	fmt.Printf("Created default config at %s\n", configPath)
-	return nil
+    logging.Info("Created default config", map[string]interface{}{"path": configPath})
+    return nil
 }
 
 func getConfigDir() (string, error) {

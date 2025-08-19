@@ -1,14 +1,16 @@
 package specs
 
 import (
-	"encoding/base64"
-	"encoding/json"
-	"fmt"
-	"io"
-	"net/http"
-	"os"
-	"path/filepath"
-	"strings"
+    "encoding/base64"
+    "encoding/json"
+    "fmt"
+    "io"
+    "net/http"
+    "os"
+    "path/filepath"
+    "strings"
+
+    "github.com/o3-cloud/artifact-specs/cli/internal/logging"
 )
 
 type GitHubClient struct {
@@ -66,10 +68,10 @@ func (g *GitHubClient) FetchSpecs(repo Repository, specType SpecType) ([]*Spec, 
 		}
 		
 		spec, err := g.fetchSpec(repo, specType, content)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Warning: failed to fetch spec %s: %v\n", content.Name, err)
-			continue
-		}
+        if err != nil {
+            logging.Warn("Failed to fetch spec", map[string]interface{}{"name": content.Name, "error": err.Error()})
+            continue
+        }
 		
 		specs = append(specs, spec)
 	}

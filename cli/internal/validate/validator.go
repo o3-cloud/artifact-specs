@@ -1,14 +1,15 @@
 package validate
 
 import (
-	"context"
-	"encoding/json"
-	"fmt"
-	"strings"
+    "context"
+    "encoding/json"
+    "fmt"
+    "strings"
 
-	"github.com/kaptinlin/jsonschema"
-	"github.com/o3-cloud/artifact-specs/cli/internal/llm"
-	"github.com/o3-cloud/artifact-specs/cli/internal/specs"
+    "github.com/kaptinlin/jsonschema"
+    "github.com/o3-cloud/artifact-specs/cli/internal/llm"
+    "github.com/o3-cloud/artifact-specs/cli/internal/specs"
+    "github.com/o3-cloud/artifact-specs/cli/internal/logging"
 )
 
 type Validator struct {
@@ -90,7 +91,7 @@ func (v *Validator) ValidateAndRetry(ctx context.Context, client llmClient, inpu
 	
 	// Retry with validation feedback
 	for attempt := 1; attempt <= maxRetries; attempt++ {
-		fmt.Printf("Validation failed (attempt %d/%d), retrying with feedback...\n", attempt, maxRetries+1)
+        logging.Info("Validation failed, retrying with feedback", map[string]interface{}{"attempt": attempt, "total_attempts": maxRetries + 1})
 		
 		// Create repair prompt
 		repairPrompt := v.createRepairPrompt(input, string(data), result)

@@ -1,12 +1,12 @@
 package render
 
 import (
-	"context"
-	"encoding/json"
-	"fmt"
-	"os"
-	"path/filepath"
-	"strings"
+    "context"
+    "encoding/json"
+    "fmt"
+    "os"
+    "path/filepath"
+    "strings"
 
 	"github.com/o3-cloud/artifact-specs/cli/internal/chunking"
 	"github.com/o3-cloud/artifact-specs/cli/internal/config"
@@ -59,8 +59,8 @@ func (r *Renderer) Render(ctx context.Context, input string, options RenderOptio
 		return nil, fmt.Errorf("input is empty")
 	}
 
-	// Step 1: Extract structured JSON
-	fmt.Fprintf(os.Stderr, "Step 1: Extracting structured data...\n")
+    // Step 1: Extract structured JSON
+    logging.Info("Step 1: Extracting structured data...")
 	
 	// Check if chunking is needed
 	tokenCounter := chunking.NewTokenCounter()
@@ -99,9 +99,9 @@ func (r *Renderer) Render(ctx context.Context, input string, options RenderOptio
 				return nil, fmt.Errorf("extraction failed: %w", err)
 			}
 
-			if !validationResult.Valid {
-				fmt.Fprintf(os.Stderr, "Warning: Final result failed validation: %s\n", validationResult.FormatErrors())
-			}
+            if !validationResult.Valid {
+                logging.Warn("Final result failed validation", map[string]interface{}{"errors": validationResult.FormatErrors()})
+            }
 		}
 	} else {
 		logging.Info("Input exceeds chunk limit, using chunked processing", map[string]interface{}{
@@ -161,18 +161,18 @@ func (r *Renderer) Render(ctx context.Context, input string, options RenderOptio
 		extractResponse = result.Stats
 
 		// Validate final result if requested
-		if !options.NoValidate {
-			validationResult := r.validator.Validate(extractedData)
-			if !validationResult.Valid {
-				fmt.Fprintf(os.Stderr, "Warning: Final result failed validation: %s\n", validationResult.FormatErrors())
-			}
-		}
+            if !options.NoValidate {
+                validationResult := r.validator.Validate(extractedData)
+                if !validationResult.Valid {
+                    logging.Warn("Final result failed validation", map[string]interface{}{"errors": validationResult.FormatErrors()})
+                }
+            }
 	}
 	
-	fmt.Fprintf(os.Stderr, "Step 1: ✓ Extraction completed\n")
+    logging.Info("Step 1: ✓ Extraction completed")
 	
-	// Step 2: Verbalize to Markdown
-	fmt.Fprintf(os.Stderr, "Step 2: Generating Markdown...\n")
+    // Step 2: Verbalize to Markdown
+    logging.Info("Step 2: Generating Markdown...")
 	
 	verbalizePrompt, err := r.createVerbalizationPrompt(extractedData)
 	if err != nil {
@@ -185,11 +185,11 @@ func (r *Renderer) Render(ctx context.Context, input string, options RenderOptio
 	if options.StreamOutput {
 		var callback llm.StreamCallback
 		if !options.ShowStats {
-			// Stream directly to stdout if not showing stats
-			callback = func(content string) error {
-				fmt.Print(content)
-				return nil
-			}
+                // Stream directly to stdout if not showing stats
+                callback = func(content string) error {
+                    fmt.Print(content)
+                    return nil
+                }
 		} else {
 			// Accumulate for later output if showing stats
 			callback = func(content string) error {
@@ -208,7 +208,7 @@ func (r *Renderer) Render(ctx context.Context, input string, options RenderOptio
 		return nil, fmt.Errorf("verbalization failed: %w", err)
 	}
 	
-	fmt.Fprintf(os.Stderr, "Step 2: ✓ Markdown generation completed\n")
+    logging.Info("Step 2: ✓ Markdown generation completed")
 	
 	// Save outputs
 	result := &RenderResult{
@@ -295,8 +295,8 @@ func (r *Renderer) saveJSON(jsonData []byte, outputPath string) (string, error) 
 		return "", fmt.Errorf("failed to write JSON file: %w", err)
 	}
 	
-	fmt.Fprintf(os.Stderr, "Intermediate JSON saved to %s\n", jsonPath)
-	return jsonPath, nil
+    logging.Info("Intermediate JSON saved", map[string]interface{}{"path": jsonPath})
+    return jsonPath, nil
 }
 
 // Interface for LLM client to support both real and mock clients

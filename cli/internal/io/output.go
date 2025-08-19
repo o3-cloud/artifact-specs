@@ -1,9 +1,11 @@
 package io
 
 import (
-	"fmt"
-	"os"
-	"path/filepath"
+    "fmt"
+    "os"
+    "path/filepath"
+
+    "github.com/o3-cloud/artifact-specs/cli/internal/logging"
 )
 
 type OutputWriter struct {
@@ -29,13 +31,13 @@ func (w *OutputWriter) WriteOutput(content string) error {
 		}
 	}
 	
-	// Write to file
-	if err := os.WriteFile(w.path, []byte(content), 0644); err != nil {
-		return fmt.Errorf("failed to write output file: %w", err)
-	}
-	
-	fmt.Fprintf(os.Stderr, "Output written to %s\n", w.path)
-	return nil
+    // Write to file
+    if err := os.WriteFile(w.path, []byte(content), 0644); err != nil {
+        return fmt.Errorf("failed to write output file: %w", err)
+    }
+
+    logging.Info("Output written", map[string]interface{}{"path": w.path})
+    return nil
 }
 
 func (w *OutputWriter) WriteJSON(content string, compact bool) error {
