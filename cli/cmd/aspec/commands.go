@@ -110,6 +110,9 @@ func init() {
 	extractCmd.Flags().Bool("stats", false, "show stats")
 	extractCmd.Flags().Bool("stream", false, "stream output")
 	extractCmd.Flags().Bool("no-stream", true, "disable streaming")
+	extractCmd.Flags().Int("chunk-size", 20000, "maximum tokens per chunk (enables chunking for large inputs)")
+	extractCmd.Flags().String("merge-strategy", "incremental", "merge strategy: incremental, two-pass, template-driven")
+	extractCmd.Flags().String("merge-instructions", "", "custom instructions for merging chunks")
 
 		// render command flags
 	renderCmd.Flags().String("spec", "", "spec slug")

@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/o3-cloud/artifact-specs/cli/internal/chunking"
 	"github.com/o3-cloud/artifact-specs/cli/internal/config"
 	"github.com/o3-cloud/artifact-specs/cli/internal/io"
 	"github.com/o3-cloud/artifact-specs/cli/internal/llm"
@@ -220,6 +221,9 @@ func runExtractCommand(cmd *cobra.Command, args []string) error {
 	enableValidate, _ := cmd.Flags().GetBool("validate")
 	compact, _ := cmd.Flags().GetBool("compact")
 	showStats, _ := cmd.Flags().GetBool("stats")
+	chunkSize, _ := cmd.Flags().GetInt("chunk-size")
+	mergeStrategy, _ := cmd.Flags().GetString("merge-strategy")
+	mergeInstructions, _ := cmd.Flags().GetString("merge-instructions")
 	
 	// If --validate is explicitly set, override --no-validate
 	if enableValidate {
@@ -243,40 +247,124 @@ func runExtractCommand(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to create LLM client: %w", err)
 	}
 	
-	// Create extraction prompt
-	extractPrompt := createExtractionPrompt(spec, input)
-	
 	ctx := context.Background()
 	
+	// Check if chunking is needed
+	tokenCounter := chunking.NewTokenCounter()
+	inputTokens := tokenCounter.CountTokens(input)
+
 	var jsonData []byte
 	var response *llm.CompletionResponse
 	
-	if noValidate {
-		// Simple extraction without validation
-		response, err = client.Complete(ctx, extractPrompt, llm.CompletionOptions{ForceJSON: true})
-		if err != nil {
-			return fmt.Errorf("extraction failed: %w", err)
+	if inputTokens <= chunkSize {
+		logging.Debug("Input fits in single chunk, processing normally", map[string]interface{}{
+			"tokens": inputTokens,
+			"limit":  chunkSize,
+		})
+
+		// Single chunk processing (existing logic)
+		extractPrompt := createExtractionPrompt(spec, input)
+
+		if noValidate {
+			response, err = client.Complete(ctx, extractPrompt, llm.CompletionOptions{ForceJSON: true})
+			if err != nil {
+				return fmt.Errorf("extraction failed: %w", err)
+			}
+			jsonData = []byte(response.Content)
+		} else {
+			validator, err := validate.NewValidator(spec)
+			if err != nil {
+				return fmt.Errorf("failed to create validator: %w", err)
+			}
+
+			var validationResult *validate.ValidationResult
+			jsonData, validationResult, err = validator.ValidateAndRetry(ctx, client, extractPrompt, maxRetries)
+			if err != nil {
+				return fmt.Errorf("extraction failed: %w", err)
+			}
+
+			if !validationResult.Valid {
+				fmt.Fprintf(os.Stderr, "Warning: Final result failed validation: %s\n", validationResult.FormatErrors())
+				os.Exit(3)
+			}
 		}
-		jsonData = []byte(response.Content)
 	} else {
-		// Extraction with validation and retry
-		validator, err := validate.NewValidator(spec)
+		logging.Info("Input exceeds chunk limit, using chunked processing", map[string]interface{}{
+			"tokens":   inputTokens,
+			"limit":    chunkSize,
+			"strategy": mergeStrategy,
+		})
+
+		// Chunked processing
+		chunker := chunking.NewChunker(chunkSize)
+		chunks, err := chunker.ChunkText(input)
 		if err != nil {
-			return fmt.Errorf("failed to create validator: %w", err)
+			return fmt.Errorf("failed to chunk input: %w", err)
+		}
+
+		// Log chunking details
+		logging.Info("Input successfully chunked", map[string]interface{}{
+			"total_tokens":   inputTokens,
+			"chunk_limit":    chunkSize,
+			"chunk_count":    len(chunks),
+			"avg_chunk_size": inputTokens / len(chunks),
+		})
+
+		// Log individual chunk sizes if verbose
+		for i, chunk := range chunks {
+			chunkTokens := tokenCounter.CountTokens(chunk)
+			logging.Debug("Chunk details", map[string]interface{}{
+				"chunk_index": i,
+				"tokens":      chunkTokens,
+				"characters":  len(chunk),
+			})
+		}
+
+		// Parse merge strategy
+		var strategy chunking.MergeStrategy
+		switch mergeStrategy {
+		case "incremental":
+			strategy = chunking.StrategyIncremental
+		case "two-pass":
+			strategy = chunking.StrategyTwoPass
+		case "template-driven":
+			strategy = chunking.StrategyTemplateDriven
+		default:
+			return fmt.Errorf("unknown merge strategy: %s", mergeStrategy)
+		}
+
+		// Create merger
+		merger := chunking.NewMerger(spec, client, chunking.MergeOptions{
+			Strategy:     strategy,
+			Instructions: mergeInstructions,
+			MaxRetries:   maxRetries,
+			ShowStats:    showStats,
+		})
+		
+		// Process chunks
+		result, err := merger.ProcessChunks(ctx, chunks)
+		if err != nil {
+			return fmt.Errorf("failed to process chunks: %w", err)
 		}
 		
-		var validationResult *validate.ValidationResult
-		jsonData, validationResult, err = validator.ValidateAndRetry(ctx, client, extractPrompt, maxRetries)
-		if err != nil {
-			return fmt.Errorf("extraction failed: %w", err)
-		}
-		
-		if !validationResult.Valid {
-			fmt.Fprintf(os.Stderr, "Warning: Final result failed validation: %s\n", validationResult.FormatErrors())
-			os.Exit(3)
+		jsonData = result.JSONData
+		response = result.Stats
+
+		// Validate final result if requested
+		if !noValidate {
+			validator, err := validate.NewValidator(spec)
+			if err != nil {
+				return fmt.Errorf("failed to create validator: %w", err)
+			}
+
+			validationResult := validator.Validate(jsonData)
+			if !validationResult.Valid {
+				fmt.Fprintf(os.Stderr, "Warning: Final result failed validation: %s\n", validationResult.FormatErrors())
+				os.Exit(3)
+			}
 		}
 	}
-	
+
 	// Format output
 	var outputData []byte
 	if compact {

@@ -192,25 +192,28 @@ Flags:
 
 ### `aspec extract`
 
-Extract structured JSON from unstructured input.
+Extract structured JSON from unstructured input. **Automatically chunks large inputs** that exceed token limits.
 
 ```bash
 aspec extract [flags]
 
 Flags:
-  --spec string       Spec slug
-  --type string       Spec type: artifacts or extractors (default "artifacts")
-  --spec-url string   Spec URL
-  --spec-path string  Spec file path
-  --in string         Input file or directory
-  --out string        Output file
-  --model string      LLM model to use
-  --max-retries int   Maximum retry attempts (default 2)
-  --no-validate       Skip validation (default true)
-  --validate          Enable validation (overrides --no-validate)
-  --compact           Compact JSON output
-  --stats             Show stats
-  --no-stream         Disable streaming (default true)
+  --spec string                     Spec slug
+  --type string                     Spec type: artifacts or extractors (default "artifacts")
+  --spec-url string                 Spec URL
+  --spec-path string                Spec file path
+  --in string                       Input file or directory
+  --out string                      Output file
+  --model string                    LLM model to use
+  --max-retries int                 Maximum retry attempts (default 2)
+  --no-validate                     Skip validation (default true)
+  --validate                        Enable validation (overrides --no-validate)
+  --compact                         Compact JSON output
+  --stats                           Show stats
+  --no-stream                       Disable streaming (default true)
+  --chunk-size int                  Maximum tokens per chunk for large inputs (default 20000)
+  --merge-strategy string           Merge strategy: incremental, two-pass, template-driven (default "incremental")
+  --merge-instructions string       Custom instructions for merging chunks
 ```
 
 ### `aspec render`
@@ -337,6 +340,14 @@ aspec extract --spec meeting_summary --in notes.md --compact
 
 # Show token usage and cost estimates
 aspec extract --spec meeting_summary --in notes.md --stats
+
+# Large document processing with chunking
+aspec extract --spec prd --in huge-requirements.md --chunk-size 15000 --stats -v
+
+# Custom merge strategy with instructions
+aspec extract --spec meeting_summary --in transcript.txt \
+  --merge-strategy two-pass \
+  --merge-instructions "Combine duplicate action items, preserve all speaker names"
 ```
 
 ## Exit Codes
@@ -386,6 +397,178 @@ Validation is disabled by default to improve performance and reduce LLM costs. T
 ### How does binary detection work?
 
 The CLI automatically skips common binary file types (PDF, images, archives, executables) when processing directories, with warnings logged to stderr.
+
+### When should I use chunking?
+
+Chunking is automatically enabled when your input exceeds the `--chunk-size` limit (default 20,000 tokens). You might want to adjust chunk size or strategy for:
+
+- **Very large documents** (100k+ tokens): Use smaller chunk sizes (10k-15k)
+- **Independent sections**: Use `two-pass` strategy
+- **Sequential content**: Use `incremental` strategy (default)
+- **Complex schemas**: Use `template-driven` strategy
+
+### How accurate is chunking vs single-pass?
+
+Chunking maintains high accuracy by:
+- Including the full JSON schema in every merge prompt
+- Using semantic boundaries to preserve context
+- Allowing custom merge instructions for domain-specific logic
+- Supporting validation of the final merged result
+
+### How are costs calculated?
+
+Cost estimates are approximate based on known OpenRouter pricing and may vary. Use `--stats` to see token usage and rough cost estimates.
+
+## Large Document Processing (Chunking)
+
+The `aspec extract` command automatically handles large documents that exceed LLM context windows by intelligently chunking the input and merging the results.
+
+### How It Works
+
+1. **Automatic Detection**: When input exceeds `--chunk-size` tokens (default 20,000), chunking is automatically enabled
+2. **Smart Splitting**: Text is split on semantic boundaries (paragraphs → sentences → words) for better context preservation
+3. **Merge Strategies**: Three different approaches for combining chunk results
+4. **Progress Tracking**: Detailed logging shows chunking and processing progress
+
+### Chunking Flags
+
+- `--chunk-size int`: Maximum tokens per chunk (default: 20000)
+- `--merge-strategy string`: How to combine chunk results
+- `--merge-instructions string`: Custom guidance for merging
+
+### Merge Strategies
+
+#### Incremental (Default)
+Processes chunks sequentially, merging each new chunk with the accumulated result.
+
+```bash
+aspec extract --spec meeting_summary --in large-document.md --merge-strategy incremental
+```
+
+Best for: Most use cases, memory efficient, good for sequential content
+
+#### Two-Pass
+Processes all chunks independently, then merges all results together.
+
+```bash
+aspec extract --spec meeting_summary --in large-document.md --merge-strategy two-pass
+```
+
+Best for: When chunks are independent, parallel-friendly content
+
+#### Template-Driven
+Uses JSON schema structure to intelligently merge chunk results.
+
+```bash
+aspec extract --spec meeting_summary --in large-document.md --merge-strategy template-driven
+```
+
+Best for: Complex schemas with specific merge requirements
+
+### Custom Merge Instructions
+
+You can provide specific instructions for how chunks should be merged:
+
+```bash
+aspec extract --spec meeting_summary --in large-document.md \
+  --merge-instructions "Prioritize newer information over older, combine action items into single list"
+```
+
+### Chunking Examples
+
+```bash
+# Large document with default chunking
+aspec extract --spec prd --in massive-requirements.md --stats
+
+# Custom chunk size for smaller context windows
+aspec extract --spec meeting_summary --in long-transcript.txt --chunk-size 15000
+
+# Two-pass strategy with validation
+aspec extract --spec risk_summary --in reports/ --merge-strategy two-pass --validate
+
+# Custom merge instructions
+aspec extract --spec action_items --in project-files/ \
+  --merge-instructions "Deduplicate similar tasks, group by priority level"
+```
+
+### Progress Monitoring
+
+Use verbose flags to see detailed chunking progress:
+
+```bash
+# Basic progress information
+aspec extract --spec summary --in large-doc.md -v
+
+# Detailed chunk information
+aspec extract --spec summary --in large-doc.md -vv
+```
+
+The chunking feature makes it possible to process arbitrarily large documents while maintaining the quality and structure of the extracted data.
+
+## Exit Codes
+
+- `0`: Success
+- `1`: Invalid arguments/input
+- `2`: LLM/API error
+- `3`: Schema validation failed
+- `4`: Output write error
+
+## Testing
+
+```bash
+# Run tests with mock provider
+aspec test --spec meeting_summary \
+  --fixture testdata/meeting_summary/input.md \
+  --expected testdata/meeting_summary/expected.json \
+  --provider mock \
+  --mock-fixture testdata/meeting_summary/mock_response.json
+
+# Build and test
+make test
+```
+
+## FAQs
+
+### How do I get an OpenRouter API key?
+
+Visit [openrouter.ai](https://openrouter.ai) and create an account to get your API key.
+
+### What models are supported?
+
+Any model available through OpenRouter, including:
+- `openai/gpt-4o-mini` (default)
+- `openai/gpt-4o`
+- `anthropic/claude-3-haiku`
+- `anthropic/claude-3-sonnet`
+
+### Can I use local schemas?
+
+Yes, use `--spec-path` to point to local JSON schema files.
+
+### Why is validation disabled by default?
+
+Validation is disabled by default to improve performance and reduce LLM costs. The CLI prioritizes speed for most use cases. When validation is needed for accuracy or compliance, use the `--validate` flag to enable it.
+
+### How does binary detection work?
+
+The CLI automatically skips common binary file types (PDF, images, archives, executables) when processing directories, with warnings logged to stderr.
+
+### When should I use chunking?
+
+Chunking is automatically enabled when your input exceeds the `--chunk-size` limit (default 20,000 tokens). You might want to adjust chunk size or strategy for:
+
+- **Very large documents** (100k+ tokens): Use smaller chunk sizes (10k-15k)
+- **Independent sections**: Use `two-pass` strategy
+- **Sequential content**: Use `incremental` strategy (default)
+- **Complex schemas**: Use `template-driven` strategy
+
+### How accurate is chunking vs single-pass?
+
+Chunking maintains high accuracy by:
+- Including the full JSON schema in every merge prompt
+- Using semantic boundaries to preserve context
+- Allowing custom merge instructions for domain-specific logic
+- Supporting validation of the final merged result
 
 ### How are costs calculated?
 
