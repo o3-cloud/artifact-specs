@@ -128,6 +128,9 @@ func init() {
 	renderCmd.Flags().Bool("no-stream", false, "disable streaming")
 	renderCmd.Flags().Bool("no-validate", true, "skip validation")
 	renderCmd.Flags().Bool("validate", false, "enable validation (overrides --no-validate)")
+	renderCmd.Flags().Int("chunk-size", 20000, "maximum tokens per chunk (enables chunking for large inputs)")
+	renderCmd.Flags().String("merge-strategy", "incremental", "merge strategy: incremental, two-pass, template-driven")
+	renderCmd.Flags().String("merge-instructions", "", "custom instructions for merging chunks")
 
 	// validate command flags
 	validateCmd.Flags().String("spec", "", "spec slug")

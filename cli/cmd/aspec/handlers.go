@@ -414,6 +414,9 @@ func runRenderCommand(cmd *cobra.Command, args []string) error {
 	noStreaming, _ := cmd.Flags().GetBool("no-stream")
 	noValidate, _ := cmd.Flags().GetBool("no-validate")
 	enableValidate, _ := cmd.Flags().GetBool("validate")
+	chunkSize, _ := cmd.Flags().GetInt("chunk-size")
+	mergeStrategy, _ := cmd.Flags().GetString("merge-strategy")
+	mergeInstructions, _ := cmd.Flags().GetString("merge-instructions")
 	
 	if noStreaming {
 		streaming = false
@@ -450,11 +453,14 @@ func runRenderCommand(cmd *cobra.Command, args []string) error {
 	// Render
 	ctx := context.Background()
 	result, err := renderer.Render(ctx, input, render.RenderOptions{
-		SaveJSON:     saveJSON,
-		OutputPath:   outputPath,
-		ShowStats:    showStats,
-		StreamOutput: streaming,
-		NoValidate:   noValidate,
+		SaveJSON:          saveJSON,
+		OutputPath:        outputPath,
+		ShowStats:         showStats,
+		StreamOutput:      streaming,
+		NoValidate:        noValidate,
+		ChunkSize:         chunkSize,
+		MergeStrategy:     mergeStrategy,
+		MergeInstructions: mergeInstructions,
 	})
 	if err != nil {
 		return fmt.Errorf("render failed: %w", err)

@@ -218,25 +218,28 @@ Flags:
 
 ### `aspec render`
 
-Render unstructured input to Markdown.
+Render unstructured input to Markdown. **Automatically chunks large inputs** that exceed token limits.
 
 ```bash
 aspec render [flags]
 
 Flags:
-  --spec string       Spec slug
-  --type string       Spec type: artifacts or extractors (default "artifacts") 
-  --spec-url string   Spec URL
-  --spec-path string  Spec file path
-  --in string         Input file or directory
-  --out string        Output file
-  --model string      LLM model to use
-  --save-json         Save intermediate JSON
-  --stats             Show stats
-  --stream            Stream output (default true)
-  --no-stream         Disable streaming
-  --no-validate       Skip validation (default true)
-  --validate          Enable validation (overrides --no-validate)
+  --spec string                     Spec slug
+  --type string                     Spec type: artifacts or extractors (default "artifacts") 
+  --spec-url string                 Spec URL
+  --spec-path string                Spec file path
+  --in string                       Input file or directory
+  --out string                      Output file
+  --model string                    LLM model to use
+  --save-json                       Save intermediate JSON
+  --stats                           Show stats
+  --stream                          Stream output (default true)
+  --no-stream                       Disable streaming
+  --no-validate                     Skip validation (default true)
+  --validate                        Enable validation (overrides --no-validate)
+  --chunk-size int                  Maximum tokens per chunk for large inputs (default 20000)
+  --merge-strategy string           Merge strategy: incremental, two-pass, template-driven (default "incremental")
+  --merge-instructions string       Custom instructions for merging chunks
 ```
 
 ### `aspec validate`
@@ -348,6 +351,14 @@ aspec extract --spec prd --in huge-requirements.md --chunk-size 15000 --stats -v
 aspec extract --spec meeting_summary --in transcript.txt \
   --merge-strategy two-pass \
   --merge-instructions "Combine duplicate action items, preserve all speaker names"
+
+# Render large document with chunking
+aspec render --spec meeting_summary --in large-transcript.txt --out report.md --chunk-size 15000
+
+# Render with custom merge strategy  
+aspec render --spec prd --in massive-requirements.md --out prd-report.md \
+  --merge-strategy template-driven \
+  --merge-instructions "Prioritize requirements by priority level, group related features"
 ```
 
 ## Exit Codes
@@ -421,7 +432,7 @@ Cost estimates are approximate based on known OpenRouter pricing and may vary. U
 
 ## Large Document Processing (Chunking)
 
-The `aspec extract` command automatically handles large documents that exceed LLM context windows by intelligently chunking the input and merging the results.
+The `aspec extract` and `aspec render` commands automatically handle large documents that exceed LLM context windows by intelligently chunking the input and merging the results.
 
 ### How It Works
 
@@ -489,6 +500,12 @@ aspec extract --spec risk_summary --in reports/ --merge-strategy two-pass --vali
 # Custom merge instructions
 aspec extract --spec action_items --in project-files/ \
   --merge-instructions "Deduplicate similar tasks, group by priority level"
+
+# Render large documents with chunking
+aspec render --spec meeting_summary --in huge-transcript.txt --out summary-report.md --stats
+
+# Render with custom chunk size and strategy
+aspec render --spec prd --in requirements/ --out prd-document.md --chunk-size 15000 --merge-strategy two-pass
 ```
 
 ### Progress Monitoring

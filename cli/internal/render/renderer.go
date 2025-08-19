@@ -6,10 +6,13 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
+	"github.com/o3-cloud/artifact-specs/cli/internal/chunking"
 	"github.com/o3-cloud/artifact-specs/cli/internal/config"
 	"github.com/o3-cloud/artifact-specs/cli/internal/io"
 	"github.com/o3-cloud/artifact-specs/cli/internal/llm"
+	"github.com/o3-cloud/artifact-specs/cli/internal/logging"
 	"github.com/o3-cloud/artifact-specs/cli/internal/specs"
 	"github.com/o3-cloud/artifact-specs/cli/internal/validate"
 )
@@ -21,11 +24,14 @@ type Renderer struct {
 }
 
 type RenderOptions struct {
-	SaveJSON     bool
-	OutputPath   string
-	ShowStats    bool
-	StreamOutput bool
-	NoValidate   bool
+	SaveJSON          bool
+	OutputPath        string
+	ShowStats         bool
+	StreamOutput      bool
+	NoValidate        bool
+	ChunkSize         int
+	MergeStrategy     string
+	MergeInstructions string
 }
 
 type RenderResult struct {
@@ -49,34 +55,117 @@ func NewRenderer(spec *specs.Spec, client llmClient) (*Renderer, error) {
 }
 
 func (r *Renderer) Render(ctx context.Context, input string, options RenderOptions) (*RenderResult, error) {
+	if strings.TrimSpace(input) == "" {
+		return nil, fmt.Errorf("input is empty")
+	}
+
 	// Step 1: Extract structured JSON
 	fmt.Fprintf(os.Stderr, "Step 1: Extracting structured data...\n")
 	
-	extractPrompt, err := r.createExtractionPrompt(input)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create extraction prompt: %w", err)
+	// Check if chunking is needed
+	tokenCounter := chunking.NewTokenCounter()
+	inputTokens := tokenCounter.CountTokens(input)
+	chunkSize := options.ChunkSize
+	if chunkSize <= 0 {
+		chunkSize = 20000 // Default chunk size
 	}
-	
+
 	var extractedData []byte
 	var extractResponse *llm.CompletionResponse
+	var err error
 	
-	if options.NoValidate {
-		// Simple extraction without validation
-		extractResponse, err = r.client.Complete(ctx, extractPrompt, llm.CompletionOptions{ForceJSON: true})
+	if inputTokens <= chunkSize {
+		logging.Debug("Input fits in single chunk, processing normally", map[string]interface{}{
+			"tokens": inputTokens,
+			"limit":  chunkSize,
+		})
+
+		// Single chunk processing
+		extractPrompt, err := r.createExtractionPrompt(input)
 		if err != nil {
-			return nil, fmt.Errorf("extraction failed: %w", err)
+			return nil, fmt.Errorf("failed to create extraction prompt: %w", err)
 		}
-		extractedData = []byte(extractResponse.Content)
+
+		if options.NoValidate {
+			extractResponse, err = r.client.Complete(ctx, extractPrompt, llm.CompletionOptions{ForceJSON: true})
+			if err != nil {
+				return nil, fmt.Errorf("extraction failed: %w", err)
+			}
+			extractedData = []byte(extractResponse.Content)
+		} else {
+			var validationResult *validate.ValidationResult
+			extractedData, validationResult, err = r.validator.ValidateAndRetry(ctx, r.client, extractPrompt, 2)
+			if err != nil {
+				return nil, fmt.Errorf("extraction failed: %w", err)
+			}
+
+			if !validationResult.Valid {
+				fmt.Fprintf(os.Stderr, "Warning: Final result failed validation: %s\n", validationResult.FormatErrors())
+			}
+		}
 	} else {
-		// Extraction with validation and retry
-		var validationResult *validate.ValidationResult
-		extractedData, validationResult, err = r.validator.ValidateAndRetry(ctx, r.client, extractPrompt, 2)
+		logging.Info("Input exceeds chunk limit, using chunked processing", map[string]interface{}{
+			"tokens":   inputTokens,
+			"limit":    chunkSize,
+			"strategy": options.MergeStrategy,
+		})
+
+		// Chunked processing
+		chunker := chunking.NewChunker(chunkSize)
+		chunks, err := chunker.ChunkText(input)
 		if err != nil {
-			return nil, fmt.Errorf("extraction failed: %w", err)
+			return nil, fmt.Errorf("failed to chunk input: %w", err)
+		}
+
+		// Log chunking details
+		logging.Info("Input successfully chunked", map[string]interface{}{
+			"total_tokens":   inputTokens,
+			"chunk_limit":    chunkSize,
+			"chunk_count":    len(chunks),
+			"avg_chunk_size": inputTokens / len(chunks),
+		})
+
+		// Parse merge strategy
+		strategy := options.MergeStrategy
+		if strategy == "" {
+			strategy = "incremental"
 		}
 		
-		if !validationResult.Valid {
-			return nil, fmt.Errorf("failed to extract valid JSON: %s", validationResult.FormatErrors())
+		var mergeStrategy chunking.MergeStrategy
+		switch strategy {
+		case "incremental":
+			mergeStrategy = chunking.StrategyIncremental
+		case "two-pass":
+			mergeStrategy = chunking.StrategyTwoPass
+		case "template-driven":
+			mergeStrategy = chunking.StrategyTemplateDriven
+		default:
+			return nil, fmt.Errorf("unknown merge strategy: %s", strategy)
+		}
+
+		// Create merger
+		merger := chunking.NewMerger(r.spec, r.client, chunking.MergeOptions{
+			Strategy:     mergeStrategy,
+			Instructions: options.MergeInstructions,
+			MaxRetries:   2,
+			ShowStats:    options.ShowStats,
+		})
+
+		// Process chunks
+		result, err := merger.ProcessChunks(ctx, chunks)
+		if err != nil {
+			return nil, fmt.Errorf("failed to process chunks: %w", err)
+		}
+
+		extractedData = result.JSONData
+		extractResponse = result.Stats
+
+		// Validate final result if requested
+		if !options.NoValidate {
+			validationResult := r.validator.Validate(extractedData)
+			if !validationResult.Valid {
+				fmt.Fprintf(os.Stderr, "Warning: Final result failed validation: %s\n", validationResult.FormatErrors())
+			}
 		}
 	}
 	
