@@ -229,6 +229,11 @@ func (m *Merger) processTemplateDriven(ctx context.Context, chunks []string) (*C
 func (m *Merger) processSingleChunk(ctx context.Context, chunk string, index int) (*ChunkResult, error) {
 	prompt := m.createExtractionPrompt(chunk)
 	
+	logging.Debug("Generated chunk extraction prompt", map[string]interface{}{
+		"chunk_index": index,
+		"prompt":      prompt,
+	})
+	
 	response, err := m.client.Complete(ctx, prompt, llm.CompletionOptions{ForceJSON: true})
 	if err != nil {
 		return nil, fmt.Errorf("extraction failed: %w", err)
@@ -246,6 +251,11 @@ func (m *Merger) processSingleChunk(ctx context.Context, chunk string, index int
 // mergeWithPrevious merges a new chunk with the previous accumulated result
 func (m *Merger) mergeWithPrevious(ctx context.Context, previousJSON []byte, newChunk string, chunkIndex int) (*ChunkResult, error) {
 	prompt := m.createMergePrompt(previousJSON, newChunk)
+	
+	logging.Debug("Generated chunk merge prompt", map[string]interface{}{
+		"chunk_index": chunkIndex,
+		"prompt":      prompt,
+	})
 	
 	response, err := m.client.Complete(ctx, prompt, llm.CompletionOptions{ForceJSON: true})
 	if err != nil {
@@ -274,6 +284,10 @@ func (m *Merger) mergeAllResults(ctx context.Context, results []*ChunkResult) (*
 
 	prompt := m.createConsolidationPrompt(jsonResults)
 	
+	logging.Debug("Generated consolidation prompt", map[string]interface{}{
+		"chunk_count": len(results),
+		"prompt":      prompt,
+	})
 	response, err := m.client.Complete(ctx, prompt, llm.CompletionOptions{ForceJSON: true})
 	if err != nil {
 		return nil, fmt.Errorf("consolidation failed: %w", err)

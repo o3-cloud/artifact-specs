@@ -265,6 +265,10 @@ func runExtractCommand(cmd *cobra.Command, args []string) error {
 		// Single chunk processing (existing logic)
 		extractPrompt := createExtractionPrompt(spec, input)
 
+		logging.Debug("Generated extraction prompt", map[string]interface{}{
+			"prompt": extractPrompt,
+		})
+
 		if noValidate {
 			response, err = client.Complete(ctx, extractPrompt, llm.CompletionOptions{ForceJSON: true})
 			if err != nil {

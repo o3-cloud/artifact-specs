@@ -86,6 +86,10 @@ func (r *Renderer) Render(ctx context.Context, input string, options RenderOptio
 			return nil, fmt.Errorf("failed to create extraction prompt: %w", err)
 		}
 
+		logging.Debug("Generated extraction prompt", map[string]interface{}{
+			"prompt": extractPrompt,
+		})
+
 		if options.NoValidate {
 			extractResponse, err = r.client.Complete(ctx, extractPrompt, llm.CompletionOptions{ForceJSON: true})
 			if err != nil {
@@ -178,6 +182,10 @@ func (r *Renderer) Render(ctx context.Context, input string, options RenderOptio
 	if err != nil {
 		return nil, fmt.Errorf("failed to create verbalization prompt: %w", err)
 	}
+
+	logging.Debug("Generated verbalization prompt", map[string]interface{}{
+		"prompt": verbalizePrompt,
+	})
 	
 	var markdownResponse *llm.CompletionResponse
 	var markdown string
