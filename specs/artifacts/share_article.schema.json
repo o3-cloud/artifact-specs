@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ArticleSharePost",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Exact title of the article being shared. Must match the original article title without modification, interpretation, or embellishment."
+    },
+    "url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Link to the article"
+    },
+    "summary": {
+      "type": "string",
+      "description": "Factual summary or commentary about the article based only on the actual content. Must not include speculation, assumptions, or information not present in the source material. Should be objective and avoid interpretations that go beyond what is explicitly stated in the article."
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of tags or topics directly relevant to the article content. Tags should be based on explicitly mentioned topics, themes, or subjects in the article, not inferred or speculative categories."
+    }
+  },
+  "required": ["title", "summary", "url"]
+}

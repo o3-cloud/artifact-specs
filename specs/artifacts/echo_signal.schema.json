@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "EchoesAndSignalsEntry",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Title of the article, talk, video, or post being highlighted."
+    },
+    "author": {
+      "type": "string",
+      "description": "Name of the author, speaker, or creator of the source."
+    },
+    "type": {
+      "type": "string",
+      "enum": ["article", "video", "talk", "post", "podcast", "book"],
+      "description": "Type of source material being referenced."
+    },
+    "link": {
+      "type": "string",
+      "format": "uri",
+      "description": "Direct URL to the source."
+    },
+    "echo": {
+      "type": "string",
+      "description": "Concise summary of the key ideas or arguments from the source."
+    },
+    "signal": {
+      "type": "string",
+      "description": "Your personal takeaway, interpretation, or why it matters."
+    },
+    "keyTakeaways": {
+      "type": "array",
+      "description": "Optional bullet-point list of specific highlights or principles from the source.",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": ["title", "type", "link", "echo", "signal"]
+}
