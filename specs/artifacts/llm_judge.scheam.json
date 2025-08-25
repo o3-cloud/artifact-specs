@@ -1,0 +1,108 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "LLM-as-a-Judge Evaluation",
+  "description": "Minimal schema for a single LLM-judged evaluation of a model's output against its input (and optional reference). This schema includes guardrails to protect against hallucinations and misinformation by requiring explicit factuality checks, verification against references, and clear reasoning for all judgments.",
+  "type": "object",
+  "properties": {
+    "input": {
+      "type": "string",
+      "description": "The original task/prompt shown to the model under evaluation."
+    },
+    "output": {
+      "type": "string",
+      "description": "The model output being judged."
+    },
+    "reference": {
+      "type": "string",
+      "description": "Optional gold/reference answer or brief spec."
+    },
+    "task_type": {
+      "type": "string",
+      "description": "Optional task label.",
+      "enum": ["qa", "summarization", "extraction", "classification", "generation", "reasoning", "code", "other"]
+    },
+
+    "judge": {
+      "type": "object",
+      "description": "Metadata about the judge run (optional).",
+      "properties": {
+        "model": { "type": "string", "description": "Judge model name/version." },
+        "mode": { "type": "string", "enum": ["automatic", "mixed"], "default": "automatic" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "additionalProperties": false
+    },
+
+    "rubric": {
+      "type": "array",
+      "description": "Optional lightweight rubric. If omitted, judge uses its own defaults.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "Criterion name, e.g., Accuracy, Relevance." },
+          "weight": { "type": "number", "minimum": 0, "description": "Relative weight; default=1." }
+        },
+        "required": ["name"],
+        "additionalProperties": false
+      }
+    },
+
+    "evaluation": {
+      "type": "object",
+      "description": "Judge verdict and rationale.",
+      "properties": {
+        "score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Overall quality score in [0,1]."
+        },
+        "verdict": {
+          "type": "string",
+          "description": "Concise decision label.",
+          "enum": ["pass", "fail", "borderline"]
+        },
+        "reason": {
+          "type": "string",
+          "description": "Short explanation of the verdict. Must include specific evidence from the input/output and clearly identify any potential hallucinations, factual errors, or unsupported claims."
+        },
+        "criteria": {
+          "type": "array",
+          "description": "Optional per-criterion scores.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "score": { "type": "number", "minimum": 0, "maximum": 1 },
+              "notes": { "type": "string" }
+            },
+            "required": ["name", "score"],
+            "additionalProperties": false
+          }
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Judge confidence in its verdict."
+        }
+      },
+      "required": ["score", "verdict", "reason"],
+      "additionalProperties": false
+    },
+
+    "checks": {
+      "type": "object",
+      "description": "Required compliance flags to guard against hallucinations and misinformation. All evaluations must explicitly verify these aspects.",
+      "properties": {
+        "instruction_following": { "type": "boolean", "description": "Did the output follow the instructions?" },
+        "factuality": { "type": "boolean", "description": "Appears factually correct and grounded in provided context/reference. Flag as false if output contains unverifiable claims, hallucinated facts, or contradicts known information." },
+        "safety_ok": { "type": "boolean", "description": "No safety/policy violations detected?" },
+        "grounding": { "type": "boolean", "description": "Output is properly grounded in provided context/reference without unsupported extrapolations or fabricated details." }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": ["input", "output", "evaluation"],
+  "additionalProperties": false
+}
