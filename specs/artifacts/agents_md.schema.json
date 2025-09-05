@@ -1,0 +1,556 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://schemas.artifact-specs.org/agents-md.schema.json",
+  "title": "AGENTS.md Schema",
+  "description": "Schema for AGENTS.md files that provide AI coding agents with project-specific guidance",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "The title of the AGENTS.md file, typically 'AGENTS instructions' or similar"
+    },
+    "description": {
+      "type": "string",
+      "description": "Brief description of what this file contains and its purpose"
+    },
+    "project": {
+      "type": "object",
+      "description": "Basic project information",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Project name"
+        },
+        "language": {
+          "type": "string",
+          "description": "Primary programming language",
+          "examples": [
+            "Python",
+            "Rust",
+            "Java",
+            "JavaScript",
+            "TypeScript",
+            "Go",
+            "C++"
+          ]
+        },
+        "framework": {
+          "type": "string",
+          "description": "Primary framework or technology stack"
+        },
+        "type": {
+          "type": "string",
+          "description": "Type of project",
+          "enum": [
+            "library",
+            "application",
+            "cli-tool",
+            "web-service",
+            "desktop-app",
+            "mobile-app",
+            "other"
+          ]
+        }
+      },
+      "required": ["name"]
+    },
+    "development_environment": {
+      "type": "object",
+      "description": "Development environment setup instructions",
+      "properties": {
+        "prerequisites": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Name of the prerequisite"
+              },
+              "version": {
+                "type": "string",
+                "description": "Required version or version range"
+              },
+              "installation": {
+                "type": "string",
+                "description": "Installation instructions or command"
+              }
+            },
+            "required": ["name"]
+          }
+        },
+        "setup_commands": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "Shell commands to run for environment setup"
+          }
+        },
+        "package_manager": {
+          "type": "string",
+          "description": "Package manager used",
+          "examples": [
+            "npm",
+            "yarn",
+            "pip",
+            "poetry",
+            "uv",
+            "cargo",
+            "maven",
+            "gradle",
+            "go mod"
+          ]
+        },
+        "virtual_environment": {
+          "type": "object",
+          "properties": {
+            "tool": {
+              "type": "string",
+              "description": "Virtual environment tool",
+              "examples": ["venv", "conda", "virtualenv", "uv", "poetry"]
+            },
+            "setup_command": {
+              "type": "string",
+              "description": "Command to create/activate virtual environment"
+            }
+          }
+        },
+        "docker": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "Whether Docker is used for development"
+            },
+            "compose_file": {
+              "type": "string",
+              "description": "Docker compose file location"
+            },
+            "development_service": {
+              "type": "string",
+              "description": "Service name for development container"
+            }
+          }
+        }
+      }
+    },
+    "code_quality": {
+      "type": "object",
+      "description": "Code quality tools and standards",
+      "properties": {
+        "linting": {
+          "type": "object",
+          "properties": {
+            "tool": {
+              "type": "string",
+              "examples": [
+                "eslint",
+                "pylint",
+                "flake8",
+                "ruff",
+                "clippy",
+                "checkstyle"
+              ]
+            },
+            "command": {
+              "type": "string",
+              "description": "Command to run linter"
+            },
+            "config_file": {
+              "type": "string",
+              "description": "Configuration file location"
+            }
+          }
+        },
+        "formatting": {
+          "type": "object",
+          "properties": {
+            "tool": {
+              "type": "string",
+              "examples": ["prettier", "black", "autopep8", "rustfmt", "gofmt"]
+            },
+            "command": {
+              "type": "string",
+              "description": "Command to run formatter"
+            }
+          }
+        },
+        "type_checking": {
+          "type": "object",
+          "properties": {
+            "tool": {
+              "type": "string",
+              "examples": ["mypy", "pyright", "typescript", "flow"]
+            },
+            "command": {
+              "type": "string",
+              "description": "Command to run type checker"
+            }
+          }
+        },
+        "pre_commit": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "Whether pre-commit hooks are used"
+            },
+            "tool": {
+              "type": "string",
+              "examples": ["pre-commit", "husky", "prek"]
+            },
+            "install_command": {
+              "type": "string",
+              "description": "Command to install pre-commit hooks"
+            },
+            "run_command": {
+              "type": "string",
+              "description": "Command to run all checks manually"
+            }
+          }
+        }
+      }
+    },
+    "testing": {
+      "type": "object",
+      "description": "Testing instructions and configurations",
+      "properties": {
+        "framework": {
+          "type": "string",
+          "description": "Testing framework used",
+          "examples": [
+            "pytest",
+            "jest",
+            "mocha",
+            "junit",
+            "go test",
+            "cargo test",
+            "vitest"
+          ]
+        },
+        "commands": {
+          "type": "object",
+          "properties": {
+            "unit": {
+              "type": "string",
+              "description": "Command to run unit tests"
+            },
+            "integration": {
+              "type": "string",
+              "description": "Command to run integration tests"
+            },
+            "all": {
+              "type": "string",
+              "description": "Command to run all tests"
+            },
+            "coverage": {
+              "type": "string",
+              "description": "Command to run tests with coverage"
+            }
+          }
+        },
+        "test_files_pattern": {
+          "type": "string",
+          "description": "Pattern for test file naming",
+          "examples": ["**/*.test.js", "**/test_*.py", "**/*_test.go"]
+        },
+        "snapshots": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "Whether snapshot testing is used"
+            },
+            "update_command": {
+              "type": "string",
+              "description": "Command to update snapshots"
+            }
+          }
+        }
+      }
+    },
+    "building": {
+      "type": "object",
+      "description": "Build instructions and configurations",
+      "properties": {
+        "commands": {
+          "type": "object",
+          "properties": {
+            "build": {
+              "type": "string",
+              "description": "Command to build the project"
+            },
+            "clean": {
+              "type": "string",
+              "description": "Command to clean build artifacts"
+            },
+            "watch": {
+              "type": "string",
+              "description": "Command for development mode with file watching"
+            },
+            "production": {
+              "type": "string",
+              "description": "Command to build for production"
+            }
+          }
+        },
+        "output_directory": {
+          "type": "string",
+          "description": "Directory where build artifacts are generated"
+        },
+        "compiler": {
+          "type": "string",
+          "description": "Compiler or build tool used",
+          "examples": [
+            "gcc",
+            "clang",
+            "javac",
+            "tsc",
+            "webpack",
+            "vite",
+            "rollup"
+          ]
+        }
+      }
+    },
+    "documentation": {
+      "type": "object",
+      "description": "Documentation generation and building",
+      "properties": {
+        "tool": {
+          "type": "string",
+          "description": "Documentation generation tool",
+          "examples": [
+            "sphinx",
+            "mkdocs",
+            "jsdoc",
+            "rustdoc",
+            "javadoc",
+            "godoc"
+          ]
+        },
+        "build_command": {
+          "type": "string",
+          "description": "Command to build documentation"
+        },
+        "serve_command": {
+          "type": "string",
+          "description": "Command to serve docs locally"
+        },
+        "output_directory": {
+          "type": "string",
+          "description": "Directory where docs are generated"
+        }
+      }
+    },
+    "conventions": {
+      "type": "object",
+      "description": "Project-specific coding conventions and patterns",
+      "properties": {
+        "naming": {
+          "type": "object",
+          "properties": {
+            "files": {
+              "type": "string",
+              "description": "File naming convention",
+              "examples": [
+                "kebab-case",
+                "snake_case",
+                "PascalCase",
+                "camelCase"
+              ]
+            },
+            "functions": {
+              "type": "string",
+              "description": "Function naming convention"
+            },
+            "variables": {
+              "type": "string",
+              "description": "Variable naming convention"
+            },
+            "classes": {
+              "type": "string",
+              "description": "Class naming convention"
+            },
+            "constants": {
+              "type": "string",
+              "description": "Constant naming convention"
+            }
+          }
+        },
+        "directory_structure": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "path": {
+                "type": "string",
+                "description": "Directory path"
+              },
+              "purpose": {
+                "type": "string",
+                "description": "Purpose or contents of this directory"
+              }
+            },
+            "required": ["path", "purpose"]
+          }
+        },
+        "patterns": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "Architectural patterns or conventions to follow"
+          }
+        }
+      }
+    },
+    "pull_requests": {
+      "type": "object",
+      "description": "Pull request guidelines and workflow",
+      "properties": {
+        "requirements": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "Requirements for pull requests"
+          }
+        },
+        "commit_message_format": {
+          "type": "string",
+          "description": "Expected commit message format"
+        },
+        "branch_naming": {
+          "type": "string",
+          "description": "Branch naming convention"
+        },
+        "review_process": {
+          "type": "string",
+          "description": "Code review process description"
+        },
+        "ci_checks": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "CI checks that must pass"
+          }
+        }
+      }
+    },
+    "deployment": {
+      "type": "object",
+      "description": "Deployment instructions and configurations",
+      "properties": {
+        "environments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Environment name",
+                "examples": ["development", "staging", "production"]
+              },
+              "url": {
+                "type": "string",
+                "description": "Environment URL if applicable"
+              },
+              "deploy_command": {
+                "type": "string",
+                "description": "Command to deploy to this environment"
+              }
+            },
+            "required": ["name"]
+          }
+        },
+        "platform": {
+          "type": "string",
+          "description": "Deployment platform",
+          "examples": [
+            "AWS",
+            "GCP",
+            "Azure",
+            "Heroku",
+            "Vercel",
+            "Netlify",
+            "Docker"
+          ]
+        }
+      }
+    },
+    "troubleshooting": {
+      "type": "object",
+      "description": "Common issues and solutions",
+      "properties": {
+        "common_issues": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "issue": {
+                "type": "string",
+                "description": "Description of the issue"
+              },
+              "solution": {
+                "type": "string",
+                "description": "Solution or workaround"
+              }
+            },
+            "required": ["issue", "solution"]
+          }
+        },
+        "debugging": {
+          "type": "object",
+          "properties": {
+            "tools": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "description": "Debugging tools available"
+              }
+            },
+            "commands": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "description": "Useful debugging commands"
+              }
+            }
+          }
+        }
+      }
+    },
+    "resources": {
+      "type": "object",
+      "description": "Additional resources and references",
+      "properties": {
+        "documentation_links": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string",
+                "description": "Link title"
+              },
+              "url": {
+                "type": "string",
+                "format": "uri",
+                "description": "URL to the resource"
+              }
+            },
+            "required": ["title", "url"]
+          }
+        },
+        "contributing_files": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "Paths to contributing documentation files"
+          }
+        }
+      }
+    }
+  },
+  "required": ["title", "project"],
+  "additionalProperties": true
+}
