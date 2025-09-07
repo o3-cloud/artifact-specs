@@ -1,0 +1,56 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SimplifiedOutcomeDefinition",
+  "description": "Schema to capture the essentials of a potential business outcome for AI OutcomeOps.",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Short name of the outcome."
+    },
+    "summary": {
+      "type": "string",
+      "description": "Brief description of the business result we want to achieve."
+    },
+    "owner": {
+      "type": "string",
+      "description": "Person or team accountable for this outcome."
+    },
+    "timeframe": {
+      "type": "string",
+      "description": "Target timeframe (e.g., Q4 2025, 6 months)."
+    },
+    "metric": {
+      "type": "object",
+      "description": "Primary metric used to measure success.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Metric name (e.g., Response Time)."
+        },
+        "baseline": {
+          "type": "number",
+          "description": "Current value of the metric."
+        },
+        "target": { "type": "number", "description": "Desired target value." },
+        "direction": {
+          "type": "string",
+          "enum": ["increase", "decrease", "maintain"],
+          "description": "Intended direction of movement."
+        }
+      },
+      "required": ["name", "target", "direction"]
+    },
+    "guardrails": {
+      "type": "array",
+      "description": "Constraints that must not be violated (e.g., customer satisfaction > 85%).",
+      "items": { "type": "string" }
+    },
+    "status": {
+      "type": "string",
+      "enum": ["proposed", "inProgress", "achieved", "notAchieved"],
+      "description": "Current lifecycle state of this outcome."
+    }
+  },
+  "required": ["title", "summary", "owner", "metric"]
+}
